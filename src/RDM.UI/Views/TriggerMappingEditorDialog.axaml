@@ -1,0 +1,59 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i18n="using:RDM.UI.Localization"
+        x:Class="RDM.UI.Views.TriggerMappingEditorDialog"
+        Icon="avares://RDM/Assets/rdm.ico"
+        Title="{i18n:Tr hw.ed.title_trigger}"
+        Width="480" Height="380"
+        MinWidth="400" MinHeight="340"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        Background="#0F0F1A">
+
+    <Window.Styles>
+        <Style Selector="TextBlock">  <Setter Property="Foreground" Value="#CCCCDD"/> <Setter Property="FontSize" Value="12"/> </Style>
+        <Style Selector="TextBox">    <Setter Property="Background" Value="#0A0A15"/> <Setter Property="Foreground" Value="#CCCCDD"/> <Setter Property="BorderBrush" Value="#2A2A3E"/> <Setter Property="Padding" Value="5,3"/> <Setter Property="FontSize" Value="12"/> </Style>
+        <Style Selector="ComboBox">   <Setter Property="Background" Value="#0A0A15"/> <Setter Property="Foreground" Value="#CCCCDD"/> <Setter Property="BorderBrush" Value="#2A2A3E"/> <Setter Property="FontSize" Value="12"/> </Style>
+        <Style Selector="Button">     <Setter Property="Background" Value="#1C1C2E"/> <Setter Property="Foreground" Value="#CCCCDD"/> <Setter Property="Padding" Value="12,5"/> <Setter Property="FontSize" Value="12"/> </Style>
+        <Style Selector="Button:pointerover /template/ ContentPresenter"> <Setter Property="Background" Value="#2A2A40"/> </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="*,Auto" Margin="16">
+
+        <Grid Grid.Row="0" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="130,*" VerticalAlignment="Top">
+
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="{i18n:Tr hw.name_label}"       VerticalAlignment="Center" Margin="0,0,8,8"/>
+            <TextBox   Grid.Row="0" Grid.Column="1" Name="NameBox"             Margin="0,0,0,8"/>
+
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="{i18n:Tr hw.ed.device_type}"  VerticalAlignment="Center" Margin="0,0,8,8"/>
+            <ComboBox  Grid.Row="1" Grid.Column="1" Name="DeviceTypeBox"       Margin="0,0,0,8" HorizontalAlignment="Stretch">
+                <ComboBoxItem Content="KEYBOARD"/>
+                <ComboBoxItem Content="MIDI"/>
+                <ComboBoxItem Content="DR_MIXER"/>
+            </ComboBox>
+
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="{i18n:Tr hw.ed.device_id}"    VerticalAlignment="Center" Margin="0,0,8,8"/>
+            <TextBox   Grid.Row="2" Grid.Column="1" Name="DeviceIdBox"         Margin="0,0,0,8" Watermark="{i18n:Tr hw.ed.device_id_wm}"/>
+
+            <TextBlock Grid.Row="3" Grid.Column="0" Text="{i18n:Tr hw.ed.signature}"    VerticalAlignment="Center" Margin="0,0,8,8"/>
+            <TextBox   Grid.Row="3" Grid.Column="1" Name="SignatureBox"        Margin="0,0,0,8" Watermark="{i18n:Tr hw.ed.signature_wm}"/>
+
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="{i18n:Tr hw.ed.action}"       VerticalAlignment="Center" Margin="0,0,8,8"/>
+            <ComboBox  Grid.Row="4" Grid.Column="1" Name="ActionIdBox"         Margin="0,0,0,8" HorizontalAlignment="Stretch"/>
+
+            <TextBlock Grid.Row="5" Grid.Column="0" Text="{i18n:Tr hw.ed.parameter}"    VerticalAlignment="Center" Margin="0,0,8,8"/>
+            <Panel     Grid.Row="5" Grid.Column="1" Margin="0,0,0,8">
+                <TextBox  Name="ParameterBox"       Watermark="{i18n:Tr hw.ed.parameter_wm}"/>
+                <ComboBox Name="ParameterPickerBox" HorizontalAlignment="Stretch" IsVisible="False"/>
+            </Panel>
+
+            <TextBlock Grid.Row="6" Grid.Column="0" Text="{i18n:Tr hw.active_label}"    VerticalAlignment="Center" Margin="0,0,8,0"/>
+            <CheckBox  Grid.Row="6" Grid.Column="1" Name="EnabledBox"          Foreground="#CCCCDD"/>
+        </Grid>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,12,0,0">
+            <Button Content="{i18n:Tr common.cancel}" Click="OnCancel"/>
+            <Button Content="{i18n:Tr common.save}" Click="OnSave" Background="#1E3A5F"/>
+        </StackPanel>
+    </Grid>
+</Window>

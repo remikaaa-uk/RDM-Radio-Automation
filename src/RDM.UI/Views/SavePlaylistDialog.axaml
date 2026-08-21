@@ -1,0 +1,91 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i18n="using:RDM.UI.Localization"
+        x:Class="RDM.UI.Views.SavePlaylistDialog"
+        Icon="avares://RDM/Assets/rdm.ico"
+        Title="{i18n:Tr sp.title}"
+        Width="430"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        SizeToContent="Height"
+        Background="#0F0F1A">
+
+    <StackPanel Margin="16,14" Spacing="10">
+
+        <!-- Name -->
+        <Grid ColumnDefinitions="90,*">
+            <TextBlock Text="{i18n:Tr hw.name_label}" VerticalAlignment="Center"
+                       FontSize="12" Foreground="LightGray"/>
+            <TextBox Grid.Column="1" x:Name="NameBox"
+                     Watermark="{i18n:Tr sp.name_watermark}"
+                     Height="26" Padding="6,2" FontSize="12"/>
+        </Grid>
+
+        <!-- Overwrite / new copy (visible when a DB playlist is loaded or the DB holds any) -->
+        <Border x:Name="OverwriteSection" IsVisible="False"
+                Background="#131320" CornerRadius="4" Padding="10,8">
+            <StackPanel Spacing="6">
+                <TextBlock Text="{i18n:Tr sp.action}" FontSize="11" Foreground="#9999CC"/>
+                <RadioButton x:Name="OverwriteRadio"
+                             Content="{i18n:Tr sp.overwrite}"
+                             GroupName="SaveMode" IsChecked="True"
+                             FontSize="12" Foreground="LightGray"
+                             IsCheckedChanged="OnModeChanged"/>
+                <RadioButton x:Name="OverwriteSelectedRadio"
+                             Content="{i18n:Tr sp.overwrite_selected}"
+                             GroupName="SaveMode" IsVisible="False"
+                             FontSize="12" Foreground="LightGray"
+                             IsCheckedChanged="OnModeChanged"/>
+                <ComboBox x:Name="ExistingCombo" IsVisible="False" IsEnabled="False"
+                          Height="26" FontSize="11"
+                          Margin="22,0,0,0" HorizontalAlignment="Stretch"
+                          SelectionChanged="OnExistingSelectionChanged"/>
+                <RadioButton x:Name="NewCopyRadio"
+                             Content="{i18n:Tr sp.new_copy}"
+                             GroupName="SaveMode"
+                             FontSize="12" Foreground="LightGray"
+                             IsCheckedChanged="OnModeChanged"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Queue items that cannot be stored in the database (external files) -->
+        <TextBlock x:Name="ExternalWarning" IsVisible="False"
+                   FontSize="11" Foreground="#E0A030" TextWrapping="Wrap"/>
+
+        <!-- Destination -->
+        <Grid x:Name="DestRow" ColumnDefinitions="90,*">
+            <TextBlock Text="{i18n:Tr sp.save_to}" VerticalAlignment="Center"
+                       FontSize="12" Foreground="LightGray"/>
+            <ComboBox Grid.Column="1" x:Name="DestCombo"
+                      Height="26" FontSize="11" SelectedIndex="0"
+                      SelectionChanged="OnDestChanged">
+                <ComboBoxItem Content="{i18n:Tr sp.dest_db}"/>
+                <ComboBoxItem Content="{i18n:Tr sp.dest_json}"/>
+                <ComboBoxItem Content="{i18n:Tr sp.dest_m3u}"/>
+            </ComboBox>
+        </Grid>
+
+        <!-- File path (visible when Plik selected) -->
+        <Grid x:Name="FilePathRow" ColumnDefinitions="90,*,Auto" IsVisible="False">
+            <TextBlock Text="{i18n:Tr sp.path}" VerticalAlignment="Center"
+                       FontSize="12" Foreground="LightGray"/>
+            <TextBox Grid.Column="1" x:Name="FilePathBox"
+                     Height="26" Padding="6,2" FontSize="11" IsReadOnly="True"/>
+            <Button Grid.Column="2" Content="{i18n:Tr sp.browse}"
+                    Height="26" Padding="8,0" Margin="6,0,0,0" FontSize="11"
+                    Click="OnBrowseFile"/>
+        </Grid>
+
+        <!-- Buttons -->
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
+                    Spacing="8" Margin="0,4,0,0">
+            <Button Content="{i18n:Tr common.ok}" x:Name="OkBtn"
+                    Width="80" Height="26" FontSize="12"
+                    IsDefault="True" Click="OnOk"/>
+            <Button Content="{i18n:Tr common.cancel}"
+                    Width="80" Height="26" FontSize="12"
+                    IsCancel="True" Click="OnCancel"/>
+        </StackPanel>
+
+    </StackPanel>
+</Window>

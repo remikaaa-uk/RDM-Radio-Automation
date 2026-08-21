@@ -1,0 +1,63 @@
+{
+  "rdm_config_version": "1.0",
+
+  "general": {
+    "language":           "pl",
+    "date_format":        "dddd, d MMMM yyyy",
+    "process_priority":   "Normal",
+    "results_to_show":    100,
+    "library_page_size":  50,
+    "allow_one_instance": true,
+    "minimize_to_tray":   false,
+    "always_on_top":      false,
+    "enable_error_log":   true,
+    "error_log_path":     "%AppData%\\RDM\\logs\\error.log",
+    "logo_path":          "",
+    "show_clock":         true,
+    "show_date":          true
+  },
+
+  "audio": {
+    "playback_buffer_ms":  450,
+    "mixer_buffer":        3,
+    "input_buffer_ms":     2500,
+    "preload_before_s":    10,
+    "fadein_manual_ms":    900,
+    "stop_fadeout_ms":     1250,
+    "bass_update_period":  100,
+    "bass_update_threads": 1
+  },
+
+  "recording": {
+    "output_directory": "",
+    "format":           "MP3",
+    "bitrate_kbps":     192,
+    "name_prefix":      "rec"
+  },
+
+  "stream_titles": {
+    "enabled":          false,
+    "output_file_path": "",
+    "format":           "$artist$ - $title$",
+    "encoding":         "UTF-8",
+    "update_on":        "TRACK_STARTED",
+    "fallback_artist":  "Radio",
+    "fallback_title":   "Testowe"
+  },
+
+  "voicetrack": {
+    "path": "VoiceTracks"
+  },
+
+  "scheduler": {
+    "allow_external_execution": true
+  },
+
+  "database": {
+    "host":     "changeme",
+    "port":     3306,
+    "name":     "rdm",
+    "username": "changeme",
+    "password": "changeme"
+  }
+}

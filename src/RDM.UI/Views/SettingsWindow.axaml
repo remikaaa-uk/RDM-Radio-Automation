@@ -1,0 +1,925 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RDM.UI.ViewModels"
+        xmlns:i18n="using:RDM.UI.Localization"
+        x:Class="RDM.UI.Views.SettingsWindow"
+        Icon="avares://RDM/Assets/rdm.ico"
+        x:DataType="vm:SettingsViewModel"
+        Title="{i18n:Tr settings.title}"
+        Width="820" Height="640"
+        WindowStartupLocation="CenterOwner"
+        CanResize="True"
+        MinWidth="720" MinHeight="520">
+
+    <Grid RowDefinitions="*,Auto">
+
+        <!-- ═══ Tab panel ════════════════════════════════════════════════════════ -->
+        <TabControl Grid.Row="0" TabStripPlacement="Left">
+            <TabControl.Styles>
+                <Style Selector="TabItem">
+                    <Setter Property="FontSize" Value="12"/>
+                    <Setter Property="Padding" Value="12,4"/>
+                    <Setter Property="MinHeight" Value="34"/>
+                    <Setter Property="Width" Value="170"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                </Style>
+            </TabControl.Styles>
+
+            <!-- ── 1. General ──────────────────────────────────────────────────── -->
+            <TabItem Header="{i18n:Tr settings.tab.general}">
+                <ScrollViewer>
+                    <StackPanel Margin="16,10" Spacing="10">
+
+                        <TextBlock Text="{i18n:Tr settings.general.section_ui}" FontSize="11" Foreground="#4AB5FF" FontWeight="SemiBold" Margin="0,4,0,0"/>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{i18n:Tr settings.general.date_format}" FontSize="11" Foreground="Gray"/>
+                            <ComboBox ItemsSource="{Binding DateFormats}" SelectedItem="{Binding DateFormat}" HorizontalAlignment="Stretch"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Spacing="20">
+                            <CheckBox Content="{i18n:Tr settings.general.show_clock}" IsChecked="{Binding ShowClock}"/>
+                            <CheckBox Content="{i18n:Tr settings.general.show_date}"  IsChecked="{Binding ShowDate}"/>
+                        </StackPanel>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{i18n:Tr settings.general.logo_path}" FontSize="11" Foreground="Gray"/>
+                            <TextBox Text="{Binding LogoPath}" Watermark="%AppData%\RDM\logo.png" Padding="6,4"/>
+                        </StackPanel>
+
+                        <TextBlock Text="{i18n:Tr settings.general.section_system}" FontSize="11" Foreground="#4AB5FF" FontWeight="SemiBold" Margin="0,8,0,0"/>
+
+                        <Grid ColumnDefinitions="*,8,*">
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.general.process_priority}" FontSize="11" Foreground="Gray"/>
+                                <ComboBox ItemsSource="{Binding Priorities}" SelectedItem="{Binding ProcessPriority}" HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.general.max_results}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding ResultsToShow}" Padding="6,4"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="*,8,*">
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.general.page_size}" FontSize="11" Foreground="Gray"/>
+                                <NumericUpDown Value="{Binding LibraryPageSize}"
+                                               Minimum="10" Maximum="500" Increment="10"
+                                               FormatString="0"
+                                               HorizontalAlignment="Stretch" />
+                            </StackPanel>
+                        </Grid>
+
+                        <StackPanel Orientation="Horizontal" Spacing="20">
+                            <CheckBox Content="{i18n:Tr settings.general.one_instance}"    IsChecked="{Binding AllowOneInstance}"/>
+                            <CheckBox Content="{i18n:Tr settings.general.minimize_tray}" IsChecked="{Binding MinimizeToTray}"/>
+                            <CheckBox Content="{i18n:Tr settings.general.always_on_top}"  IsChecked="{Binding AlwaysOnTop}"/>
+                            <CheckBox Content="{i18n:Tr settings.general.error_log}"          IsChecked="{Binding EnableErrorLog}"/>
+                        </StackPanel>
+
+                        <TextBlock Text="{i18n:Tr settings.general.priority_restart}"
+                                   FontSize="11" Foreground="#FF9800"/>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ── 2. Output Device ────────────────────────────────────────────── -->
+            <TabItem Header="{i18n:Tr settings.tab.output}">
+                <ScrollViewer>
+                    <StackPanel Margin="16,10" Spacing="10">
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{i18n:Tr settings.output.mode}" FontSize="11" Foreground="Gray"/>
+                            <ComboBox ItemsSource="{Binding OutputModes}"
+                                      SelectedValue="{Binding OutputMode}"
+                                      SelectedValueBinding="{Binding Value}"
+                                      Width="240" HorizontalAlignment="Left">
+                                <ComboBox.Styles>
+                                    <!-- Grey out and block selection of not-yet-implemented driver modes -->
+                                    <Style Selector="ComboBoxItem">
+                                        <Setter Property="IsEnabled" Value="{Binding IsEnabled}"/>
+                                    </Style>
+                                </ComboBox.Styles>
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Display}"/>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <TextBlock Text="{i18n:Tr settings.output.section_routing}" FontSize="11" Foreground="#4AB5FF" FontWeight="SemiBold" Margin="0,6,0,0"/>
+
+                        <Grid ColumnDefinitions="*,8,*">
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.output.main_player}" FontSize="11" Foreground="Gray"/>
+                                <ComboBox ItemsSource="{Binding OutputDevices}"
+                                          SelectedItem="{Binding SelectedPlayerDevice}"
+                                          DisplayMemberBinding="{Binding DisplayName}"
+                                          HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.output.sweeper}" FontSize="11" Foreground="Gray"/>
+                                <ComboBox ItemsSource="{Binding OutputDevices}"
+                                          SelectedItem="{Binding SelectedSweeperDevice}"
+                                          DisplayMemberBinding="{Binding DisplayName}"
+                                          HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="*,8,*">
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.output.pfl}" FontSize="11" Foreground="Gray"/>
+                                <ComboBox ItemsSource="{Binding OutputDevices}"
+                                          SelectedItem="{Binding SelectedPflDevice}"
+                                          DisplayMemberBinding="{Binding DisplayName}"
+                                          HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.output.cartwall}" FontSize="11" Foreground="Gray"/>
+                                <ComboBox ItemsSource="{Binding OutputDevices}"
+                                          SelectedItem="{Binding SelectedCartwallDevice}"
+                                          DisplayMemberBinding="{Binding DisplayName}"
+                                          HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="*,8,*,8,*,8,*">
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.output.aux1}" FontSize="11" Foreground="Gray"/>
+                                <ComboBox ItemsSource="{Binding OutputDevices}" SelectedItem="{Binding SelectedAux1Device}" DisplayMemberBinding="{Binding DisplayName}" HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.output.aux2}" FontSize="11" Foreground="Gray"/>
+                                <ComboBox ItemsSource="{Binding OutputDevices}" SelectedItem="{Binding SelectedAux2Device}" DisplayMemberBinding="{Binding DisplayName}" HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="4" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.output.aux3}" FontSize="11" Foreground="Gray"/>
+                                <ComboBox ItemsSource="{Binding OutputDevices}" SelectedItem="{Binding SelectedAux3Device}" DisplayMemberBinding="{Binding DisplayName}" HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="6" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.output.aux4}" FontSize="11" Foreground="Gray"/>
+                                <ComboBox ItemsSource="{Binding OutputDevices}" SelectedItem="{Binding SelectedAux4Device}" DisplayMemberBinding="{Binding DisplayName}" HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock Text="{i18n:Tr settings.output.section_mic}" FontSize="11" Foreground="#4AB5FF" FontWeight="SemiBold" Margin="0,6,0,0"/>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{i18n:Tr settings.output.mic_device}" FontSize="11" Foreground="Gray"/>
+                            <ComboBox ItemsSource="{Binding InputDevices}"
+                                      SelectedItem="{Binding SelectedInputDevice}"
+                                      DisplayMemberBinding="{Binding DisplayName}"
+                                      Width="340" HorizontalAlignment="Left"/>
+                        </StackPanel>
+
+                        <TextBlock Text="{i18n:Tr settings.output.section_buffers}" FontSize="11" Foreground="#4AB5FF" FontWeight="SemiBold" Margin="0,6,0,0"/>
+
+                        <Grid ColumnDefinitions="*,8,*,8,*,8,*">
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.output.playback_buffer}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding PlaybackBufferMs}" Padding="6,4"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.output.mixer_buffer}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding MixerBuffer}" Padding="6,4"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="4" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.output.input_buffer}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding InputBufferMs}" Padding="6,4"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="6" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.output.preload}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding PreloadBeforeS}" Padding="6,4"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock Text="{i18n:Tr settings.output.restart}"
+                                   FontSize="11" Foreground="#FF9800"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ── 3. Audio ────────────────────────────────────────────────────── -->
+            <TabItem Header="{i18n:Tr settings.tab.audio}">
+                <ScrollViewer>
+                    <StackPanel Margin="16,10" Spacing="10">
+
+                        <TextBlock Text="{i18n:Tr settings.audio.section_engine}" FontSize="11" Foreground="#4AB5FF" FontWeight="SemiBold"/>
+
+                        <Grid ColumnDefinitions="*,8,*">
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.audio.sample_rate}" FontSize="11" Foreground="Gray"/>
+                                <ComboBox ItemsSource="{Binding SampleRates}" SelectedItem="{Binding SampleRate}" HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.audio.buffer_size}" FontSize="11" Foreground="Gray"/>
+                                <ComboBox ItemsSource="{Binding BufferSizes}" SelectedItem="{Binding BufferSize}" HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock Text="{i18n:Tr settings.audio.section_crossfade}" FontSize="11" Foreground="#4AB5FF" FontWeight="SemiBold" Margin="0,8,0,0"/>
+
+                        <CheckBox Content="{i18n:Tr settings.audio.crossfade_enable}" IsChecked="{Binding CrossfadeEnabled}"/>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{i18n:Tr settings.audio.crossfade_duration}" FontSize="11" Foreground="Gray"/>
+                            <TextBox Text="{Binding CrossfadeDurationMs}" Width="160" HorizontalAlignment="Left" Padding="6,4"/>
+                            <TextBlock Text="{i18n:Tr settings.audio.crossfade_curve_note}" FontSize="10" Foreground="Gray" Opacity="0.7"/>
+                        </StackPanel>
+
+                        <TextBlock Text="{i18n:Tr settings.audio.section_ducking}" FontSize="11" Foreground="#4AB5FF" FontWeight="SemiBold" Margin="0,8,0,0"/>
+
+                        <Grid ColumnDefinitions="*,8,*,8,*">
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.audio.duck_level}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding DuckingLevelDb}" Padding="6,4"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.audio.duck_attack}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding DuckingAttackMs}" Padding="6,4"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="4" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.audio.duck_release}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding DuckingReleaseMs}" Padding="6,4"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock Text="{i18n:Tr settings.audio.restart}"
+                                   FontSize="11" Foreground="#FF9800"/>
+                        <TextBlock Text="{i18n:Tr settings.audio.applied_note}"
+                                   FontSize="11" Foreground="#4CAF50"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ── 4. Auto DJ ──────────────────────────────────────────────────── -->
+            <TabItem Header="{i18n:Tr settings.tab.autodj}">
+                <ScrollViewer>
+                    <StackPanel Margin="16,10" Spacing="10">
+
+                        <Grid ColumnDefinitions="*,8,*,8,*">
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.autodj.stop_fadeout}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding StopFadeoutMs}" Padding="6,4"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.autodj.manual_fadein}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding FadeInManualMs}" Padding="6,4"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="4" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.autodj.auto_fadeout}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding AutoFadeOutDurationS}" Padding="6,4"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="*,8,*,8,*">
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.autodj.aux_fadeout}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding AuxFadeoutMs}" Padding="6,4"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock Text="{i18n:Tr settings.autodj.section_silence}" FontSize="11" Foreground="#4AB5FF" FontWeight="SemiBold" Margin="0,8,0,0"/>
+
+                        <CheckBox Content="{i18n:Tr settings.autodj.silence_enable}" IsChecked="{Binding SilenceRemoverEnabled}"/>
+
+                        <Grid ColumnDefinitions="*,8,*,8,*">
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.autodj.silence_start}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding SilenceStartThresholdDb}" Padding="6,4"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.autodj.silence_mix}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding SilenceMixThresholdDb}" Padding="6,4"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="4" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.autodj.silence_end}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding SilenceEndThresholdDb}" Padding="6,4"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock Text="{i18n:Tr settings.autodj.section_sweeper}" FontSize="11" Foreground="#4AB5FF" FontWeight="SemiBold" Margin="0,8,0,0"/>
+
+                        <CheckBox Content="{i18n:Tr settings.autodj.sweeper_enable}" IsChecked="{Binding SweeperEnabled}"/>
+
+                        <Grid ColumnDefinitions="*,8,*,8,*,8,Auto">
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.autodj.music_category}" FontSize="11" Foreground="Gray"/>
+                                <ComboBox ItemsSource="{Binding FormatOptions}"
+                                          SelectedValue="{Binding MusicFormatId}"
+                                          SelectedValueBinding="{Binding FormatId}"
+                                          DisplayMemberBinding="{Binding Name}"
+                                          HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.autodj.sweeper_category}" FontSize="11" Foreground="Gray"/>
+                                <ComboBox ItemsSource="{Binding FormatOptions}"
+                                          SelectedValue="{Binding SweeperFormatId}"
+                                          SelectedValueBinding="{Binding FormatId}"
+                                          DisplayMemberBinding="{Binding Name}"
+                                          HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="4" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.autodj.min_intro}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding SweeperMinIntroMs}" Padding="6,4"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="6" Spacing="4" Width="90">
+                                <TextBlock Text="{i18n:Tr settings.autodj.track_ducking}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding SweeperDuckingDb}" Padding="6,4"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock Text="{i18n:Tr settings.autodj.applied_note}"
+                                   FontSize="11" Foreground="#4CAF50"/>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ── 5. Playlist ─────────────────────────────────────────────────── -->
+            <TabItem Header="{i18n:Tr settings.tab.playlist}">
+                <ScrollViewer>
+                    <StackPanel Margin="16,10" Spacing="10">
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{i18n:Tr settings.playlist.default_mode}" FontSize="11" Foreground="Gray"/>
+                            <ComboBox ItemsSource="{Binding PlaylistModes}" SelectedItem="{Binding DefaultMode}" Width="200" HorizontalAlignment="Left"/>
+                        </StackPanel>
+
+                        <TextBlock Text="{i18n:Tr settings.playlist.section_countdown}" FontSize="11" Foreground="#4AB5FF" FontWeight="SemiBold" Margin="0,8,0,0"/>
+
+                        <Grid ColumnDefinitions="Auto,*">
+                            <CheckBox Grid.Column="0" Content="{i18n:Tr settings.playlist.countdown_red}" IsChecked="{Binding CountdownRedEnabled}" VerticalAlignment="Center"/>
+                            <StackPanel Grid.Column="1" Spacing="4" Margin="16,0,0,0">
+                                <TextBlock Text="{i18n:Tr settings.playlist.threshold_s}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding CountdownRedThresholdS}" Width="80" HorizontalAlignment="Left" Padding="6,4"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <CheckBox Content="{i18n:Tr settings.playlist.countdown_green}" IsChecked="{Binding CountdownGreenEnabled}"/>
+
+                        <TextBlock Text="{i18n:Tr settings.playlist.section_deadair}" FontSize="11" Foreground="#4AB5FF" FontWeight="SemiBold" Margin="0,8,0,0"/>
+
+                        <Grid ColumnDefinitions="Auto,*">
+                            <CheckBox Grid.Column="0" Content="{i18n:Tr settings.playlist.deadair_enable}" IsChecked="{Binding DeadAirEnabled}" VerticalAlignment="Center"/>
+                            <StackPanel Grid.Column="1" Spacing="4" Margin="16,0,0,0">
+                                <TextBlock Text="{i18n:Tr settings.playlist.threshold_s}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding DeadAirThresholdS}" Width="80" HorizontalAlignment="Left" Padding="6,4"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{i18n:Tr settings.playlist.emergency}" FontSize="11" Foreground="Gray"/>
+                            <ComboBox ItemsSource="{Binding EmergencyPlaylists}"
+                                      SelectedItem="{Binding SelectedEmergencyPlaylist}"
+                                      DisplayMemberBinding="{Binding Name}"
+                                      Width="340" HorizontalAlignment="Left"/>
+                        </StackPanel>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ── 6. Cartwall ─────────────────────────────────────────────────── -->
+            <TabItem Header="{i18n:Tr settings.tab.cartwall}">
+                <ScrollViewer>
+                    <StackPanel Margin="16,10" Spacing="10">
+
+                        <Grid ColumnDefinitions="*,8,*">
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.cartwall.slots_per_page}" FontSize="11" Foreground="Gray"/>
+                                <ComboBox ItemsSource="{Binding SlotCounts}" SelectedItem="{Binding CartwallSlotsPerPage}" HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.cartwall.fadeout}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding CartwallFadeoutMs}" Padding="6,4"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <CheckBox Content="{i18n:Tr settings.cartwall.separate_window}" IsChecked="{Binding CartwallSeparateWindow}"/>
+
+                        <TextBlock Text="{i18n:Tr settings.cartwall.restart}"
+                                   FontSize="11" Foreground="#FF9800"/>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ── 6a. Streaming ───────────────────────────────────────────────── -->
+            <TabItem Header="{i18n:Tr settings.tab.streaming}">
+                <Grid RowDefinitions="Auto,Auto,*,Auto,Auto" Margin="16,10">
+
+                    <CheckBox Grid.Row="0"
+                              Content="{i18n:Tr settings.streaming.enable}"
+                              IsChecked="{Binding StreamingModuleEnabled}"/>
+
+                    <TextBlock Grid.Row="1"
+                               Text="{i18n:Tr settings.streaming.enable_hint}"
+                               FontSize="11" Foreground="Gray" TextWrapping="Wrap"
+                               Margin="24,2,0,10"/>
+
+                    <Border Grid.Row="2" Background="#0A0A15" BorderBrush="#2A2A3E" BorderThickness="1"
+                            IsEnabled="{Binding StreamingModuleEnabled}">
+                        <Grid>
+                            <TextBlock Text="{i18n:Tr settings.streaming.empty}"
+                                       Foreground="#66667A" FontSize="12"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       TextWrapping="Wrap" MaxWidth="380" TextAlignment="Center"
+                                       IsVisible="{Binding Streaming.HasNoProfiles}"/>
+
+                            <ListBox ItemsSource="{Binding Streaming.Profiles}"
+                                     SelectedItem="{Binding Streaming.Selected}"
+                                     Background="Transparent" BorderThickness="0"
+                                     IsVisible="{Binding !Streaming.HasNoProfiles}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:EncoderProfileRowViewModel">
+                                        <Grid ColumnDefinitions="Auto,Auto,*,Auto" Margin="4,6">
+
+                                            <!-- "Ready": this profile joins the set the bottom-bar
+                                                 button starts. Saved the moment it is ticked. -->
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal"
+                                                        VerticalAlignment="Center" Spacing="2">
+                                                <CheckBox IsChecked="{Binding IsArmed}"
+                                                          ToolTip.Tip="{i18n:Tr settings.streaming.armed_tip}"
+                                                          VerticalAlignment="Center"/>
+                                                <!-- Nested: auto-start is only offered once the
+                                                     profile is ready. A profile that started by
+                                                     itself but was skipped by the bar button
+                                                     could not be brought back after a stop. -->
+                                                <CheckBox IsChecked="{Binding IsAutoStart}"
+                                                          IsEnabled="{Binding CanAutoStart}"
+                                                          Content="⏻" FontSize="10"
+                                                          ToolTip.Tip="{i18n:Tr settings.streaming.autostart_tip}"
+                                                          VerticalAlignment="Center"/>
+                                            </StackPanel>
+
+                                            <Ellipse Grid.Column="1" Width="10" Height="10"
+                                                     Fill="{Binding StateBrush}"
+                                                     VerticalAlignment="Center" Margin="4,0,10,0"/>
+
+                                            <StackPanel Grid.Column="2" Spacing="1">
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <TextBlock Text="{Binding Name}"
+                                                               Foreground="#DDDDEE" FontSize="13" FontWeight="Bold"/>
+                                                    <TextBlock Text="{Binding FormatText}"
+                                                               Foreground="#66667A" FontSize="11"
+                                                               VerticalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding StateText}"
+                                                               Foreground="{Binding StateBrush}" FontSize="11"
+                                                               VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                                <TextBlock Text="{Binding DetailText}"
+                                                           Foreground="#8888A0" FontSize="10"
+                                                           TextTrimming="CharacterEllipsis"/>
+                                            </StackPanel>
+
+                                            <!-- Per-profile control stays here: when one of several
+                                                 profiles drops, restarting just that one must not
+                                                 mean taking the whole station off air first. -->
+                                            <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="4">
+                                                <Button Content="▶" Padding="8,3" FontSize="11"
+                                                        ToolTip.Tip="{i18n:Tr settings.streaming.tip.start}"
+                                                        Foreground="#5DDC8A"
+                                                        IsEnabled="{Binding CanStart}"
+                                                        Command="{ReflectionBinding $parent[Window].DataContext.Streaming.StartCommand}"
+                                                        CommandParameter="{Binding}"/>
+                                                <Button Content="■" Padding="8,3" FontSize="11"
+                                                        ToolTip.Tip="{i18n:Tr settings.streaming.tip.stop}"
+                                                        Foreground="#FF6B6B"
+                                                        IsEnabled="{Binding CanStop}"
+                                                        Command="{ReflectionBinding $parent[Window].DataContext.Streaming.StopCommand}"
+                                                        CommandParameter="{Binding}"/>
+                                                <Button Content="✎" Padding="8,3" FontSize="11"
+                                                        ToolTip.Tip="{i18n:Tr settings.streaming.tip.edit}"
+                                                        Command="{ReflectionBinding $parent[Window].DataContext.Streaming.EditCommand}"
+                                                        CommandParameter="{Binding}"/>
+                                                <Button Content="🗑" Padding="8,3" FontSize="11"
+                                                        ToolTip.Tip="{i18n:Tr settings.streaming.tip.delete}"
+                                                        Command="{ReflectionBinding $parent[Window].DataContext.Streaming.DeleteCommand}"
+                                                        CommandParameter="{Binding}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+                    </Border>
+
+                    <TextBlock Grid.Row="3"
+                               Text="{Binding Streaming.Message}"
+                               Foreground="{Binding Streaming.MessageBrush}" FontSize="11"
+                               TextWrapping="Wrap" Margin="0,8,0,0"
+                               IsVisible="{Binding Streaming.Message, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+
+                    <StackPanel Grid.Row="4" Orientation="Horizontal" Spacing="8" Margin="0,10,0,0"
+                                IsEnabled="{Binding StreamingModuleEnabled}">
+                        <Button Content="{i18n:Tr settings.streaming.add}"
+                                Command="{Binding Streaming.AddCommand}"/>
+                        <Button Content="{i18n:Tr history.refresh}"
+                                Command="{Binding Streaming.LoadCommand}"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <!-- ── 6b. Recording ───────────────────────────────────────────────── -->
+            <TabItem Header="{i18n:Tr settings.tab.recording}">
+                <ScrollViewer>
+                    <StackPanel Margin="16,10" Spacing="10">
+
+                        <CheckBox Content="{i18n:Tr settings.recording.enable}"
+                                  IsChecked="{Binding RecordingModuleEnabled}"/>
+
+                        <TextBlock Text="{i18n:Tr settings.recording.enable_hint}"
+                                   FontSize="11" Foreground="Gray" TextWrapping="Wrap"
+                                   Margin="24,-4,0,6"/>
+
+                        <StackPanel Spacing="4" IsEnabled="{Binding RecordingModuleEnabled}">
+                            <TextBlock Text="{i18n:Tr settings.recording.folder}" FontSize="11" Foreground="Gray"/>
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBox Text="{Binding RecordingDirectory}" Padding="6,4"/>
+                                <Button Grid.Column="1" Margin="6,0,0,0"
+                                        Content="{i18n:Tr settings.recording.browse}"
+                                        Command="{Binding BrowseRecordingFolderCommand}"/>
+                            </Grid>
+                        </StackPanel>
+
+                        <Grid ColumnDefinitions="*,8,*" IsEnabled="{Binding RecordingModuleEnabled}">
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.recording.format}" FontSize="11" Foreground="Gray"/>
+                                <ComboBox ItemsSource="{Binding RecordingFormats}"
+                                          SelectedItem="{Binding RecordingFormat}"
+                                          HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.recording.bitrate}" FontSize="11" Foreground="Gray"/>
+                                <ComboBox ItemsSource="{Binding RecordingBitrates}"
+                                          SelectedItem="{Binding RecordingBitrateKbps}"
+                                          HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <StackPanel Spacing="4" IsEnabled="{Binding RecordingModuleEnabled}">
+                            <TextBlock Text="{i18n:Tr settings.recording.name_prefix}" FontSize="11" Foreground="Gray"/>
+                            <TextBox Text="{Binding RecordingNamePrefix}" Watermark="rec" Padding="6,4"/>
+                        </StackPanel>
+
+                        <Border Background="#11111C" CornerRadius="4" Padding="10,8">
+                            <TextBlock Text="{i18n:Tr settings.recording.note}"
+                                       FontSize="11" Foreground="Gray" TextWrapping="Wrap"/>
+                        </Border>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ── 7. Stream Titles ────────────────────────────────────────────── -->
+            <TabItem Header="{i18n:Tr settings.tab.streamtitles}">
+                <ScrollViewer>
+                    <StackPanel Margin="16,10" Spacing="10">
+
+                        <CheckBox Content="{i18n:Tr settings.stream.enable}" IsChecked="{Binding StreamTitlesEnabled}"/>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{i18n:Tr settings.stream.output_path}" FontSize="11" Foreground="Gray"/>
+                            <TextBox Text="{Binding StreamTitlesPath}" Watermark="C:\songs\song.txt" Padding="6,4"/>
+                        </StackPanel>
+
+                        <Grid ColumnDefinitions="*,8,*">
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.stream.format}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding StreamTitlesFormat}" Watermark="$artist$ - $title$" Padding="6,4"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.stream.encoding}" FontSize="11" Foreground="Gray"/>
+                                <ComboBox ItemsSource="{Binding EncodingOptions}" SelectedItem="{Binding StreamTitlesEncoding}" HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{i18n:Tr settings.stream.update_on}" FontSize="11" Foreground="Gray"/>
+                            <ComboBox ItemsSource="{Binding UpdateOnOptions}" SelectedItem="{Binding StreamTitlesUpdateOn}" Width="240" HorizontalAlignment="Left"/>
+                        </StackPanel>
+
+                        <Grid ColumnDefinitions="*,8,*">
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.stream.fallback_artist}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding StreamTitlesFallbackArtist}" Padding="6,4"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.stream.fallback_title}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding StreamTitlesFallbackTitle}" Padding="6,4"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{i18n:Tr settings.stream.categories}" FontSize="11" Foreground="Gray"/>
+                            <ItemsControl ItemsSource="{Binding StreamTitleFormats}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:StreamTitleFormatItem">
+                                        <CheckBox Content="{Binding Name}"
+                                                  IsChecked="{Binding IsChecked}"
+                                                  Margin="0,0,12,4"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+
+                        <Border Background="#11111C" CornerRadius="4" Padding="10,8">
+                            <TextBlock Text="{i18n:Tr settings.stream.tokens}"
+                                       FontSize="11" Foreground="Gray" FontFamily="Consolas,Monospace"/>
+                        </Border>
+
+                        <TextBlock Text="{i18n:Tr settings.stream.applied_note}"
+                                   FontSize="11" Foreground="#4CAF50"/>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ── 8. API ──────────────────────────────────────────────────────── -->
+            <TabItem Header="{i18n:Tr settings.tab.api}">
+                <ScrollViewer>
+                    <StackPanel Margin="16,10" Spacing="10">
+
+                        <CheckBox Content="{i18n:Tr settings.api.enable}" IsChecked="{Binding ApiEnabled}"/>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{i18n:Tr settings.api.port}" FontSize="11" Foreground="Gray"/>
+                            <TextBox Text="{Binding ApiPort}" Width="120" HorizontalAlignment="Left" Padding="6,4"/>
+                        </StackPanel>
+
+                        <TextBlock Text="{i18n:Tr settings.api.section_auth}" FontSize="11" Foreground="#4AB5FF" FontWeight="SemiBold" Margin="0,8,0,0"/>
+
+                        <CheckBox Content="{i18n:Tr settings.api.require_auth}" IsChecked="{Binding ApiAuthEnabled}"/>
+                        <CheckBox Content="{i18n:Tr settings.api.anon_local}"   IsChecked="{Binding ApiAnonymousLocal}"/>
+
+                        <Grid ColumnDefinitions="*,8,*">
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.api.username}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding ApiUsername}" Padding="6,4"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.api.new_password}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding ApiNewPassword}"
+                                         PasswordChar="●"
+                                         Padding="6,4"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock Text="{i18n:Tr settings.api.restart}"
+                                   FontSize="11" Foreground="#FF9800"/>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ── 9. Appearance ──────────────────────────────────────────────── -->
+            <TabItem Header="{i18n:Tr settings.tab.appearance}">
+                <ScrollViewer>
+                    <StackPanel Margin="16,10" Spacing="10">
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{i18n:Tr settings.appearance.theme}" FontSize="11" Foreground="Gray"/>
+                            <ComboBox ItemsSource="{Binding AppThemes}" SelectedItem="{Binding Theme}" Width="160" HorizontalAlignment="Left"/>
+                        </StackPanel>
+
+                        <TextBlock Text="{i18n:Tr settings.appearance.theme_restart}"
+                                   FontSize="11" Foreground="#FF9800"/>
+
+                        <StackPanel Spacing="4" Margin="0,8,0,0">
+                            <TextBlock Text="{i18n:Tr settings.appearance.language}" FontSize="11" Foreground="Gray"/>
+                            <ComboBox ItemsSource="{Binding LanguageOptions}"
+                                      SelectedValue="{Binding Language}"
+                                      SelectedValueBinding="{Binding Code}"
+                                      DisplayMemberBinding="{Binding Name}"
+                                      Width="200" HorizontalAlignment="Left"/>
+                        </StackPanel>
+
+                        <TextBlock Text="{i18n:Tr settings.appearance.language_restart}"
+                                   FontSize="11" Foreground="#FF9800"/>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ── 10. Backup ─────────────────────────────────────────────────── -->
+            <TabItem Header="{i18n:Tr settings.tab.backup}">
+                <ScrollViewer>
+                    <StackPanel Margin="16,10" Spacing="10">
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{i18n:Tr settings.backup.folder}" FontSize="11" Foreground="Gray"/>
+                            <TextBox Text="{Binding BackupPath}" Watermark="C:\RDM\backups\" Padding="6,4"/>
+                        </StackPanel>
+
+                        <Grid ColumnDefinitions="*,8,*">
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.backup.interval}" FontSize="11" Foreground="Gray"/>
+                                <ComboBox ItemsSource="{Binding BackupIntervals}" SelectedItem="{Binding BackupIntervalH}" HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.backup.keep_count}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding BackupKeepCount}" Padding="6,4"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <CheckBox Content="{i18n:Tr settings.backup.on_close}" IsChecked="{Binding BackupOnClose}"/>
+
+                        <Border Background="#0A0A15" CornerRadius="4" Padding="12,8" Margin="0,8,0,0">
+                            <StackPanel Spacing="6">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="{i18n:Tr settings.backup.last}" FontSize="11" Foreground="Gray"/>
+                                    <TextBlock Text="{Binding BackupLastAtText}" FontSize="11"/>
+                                </StackPanel>
+                                <Button Content="{i18n:Tr settings.backup.create_now}"
+                                        Command="{Binding CreateBackupNowCommand}"
+                                        IsEnabled="{Binding !IsBusy}"
+                                        Padding="14,6" HorizontalAlignment="Left"/>
+                            </StackPanel>
+                        </Border>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ── 11. Mikrofon ──────────────────────────────────────────────── -->
+            <TabItem Header="{i18n:Tr settings.tab.mic}">
+                <ScrollViewer>
+                    <StackPanel Margin="16,10" Spacing="10">
+
+                        <TextBlock Text="{i18n:Tr settings.mic.section_device}" FontSize="11" Foreground="#4AB5FF" FontWeight="SemiBold"/>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{i18n:Tr settings.mic.device}" FontSize="11" Foreground="Gray"/>
+                            <ComboBox ItemsSource="{Binding InputDevices}"
+                                      SelectedItem="{Binding SelectedInputDevice}"
+                                      DisplayMemberBinding="{Binding DisplayName}"
+                                      Width="340" HorizontalAlignment="Left"/>
+                        </StackPanel>
+
+                        <TextBlock Text="{i18n:Tr settings.mic.section_ducking}" FontSize="11" Foreground="#4AB5FF" FontWeight="SemiBold" Margin="0,8,0,0"/>
+
+                        <TextBlock Text="{i18n:Tr settings.mic.duck_desc}"
+                                   FontSize="10" Foreground="#606070" TextWrapping="Wrap"/>
+
+                        <Grid ColumnDefinitions="*,8,*,8,*">
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.mic.duck_level}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding DuckingLevelDb}" Padding="6,4"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.mic.duck_attack}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding DuckingAttackMs}" Padding="6,4"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="4" Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.mic.duck_release}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding DuckingReleaseMs}" Padding="6,4"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock Text="{i18n:Tr settings.mic.section_dsp}" FontSize="11" Foreground="#4AB5FF" FontWeight="SemiBold" Margin="0,8,0,0"/>
+
+                        <Button x:Name="MicFxWindowButton"
+                                Content="{i18n:Tr settings.mic.manage_fx}"
+                                HorizontalAlignment="Left"
+                                Padding="12,6"
+                                ToolTip.Tip="{i18n:Tr settings.mic.manage_fx_tip}" />
+
+                        <TextBlock Text="{i18n:Tr settings.mic.applied_note}"
+                                   FontSize="11" Foreground="#4CAF50"/>
+                        <TextBlock Text="{i18n:Tr settings.mic.device_restart}"
+                                   FontSize="11" Foreground="#FF9800" TextWrapping="Wrap"/>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ── 11a. Użytkownicy ────────────────────────────────────────────── -->
+            <TabItem Header="{i18n:Tr settings.tab.users}">
+                <Grid RowDefinitions="*,Auto,Auto" Margin="16,10">
+
+                    <ListBox Grid.Row="0"
+                             ItemsSource="{Binding Users.Users}"
+                             Background="Transparent" BorderThickness="0">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="vm:UserRowViewModel">
+                                <Grid ColumnDefinitions="*,Auto,Auto,Auto" Margin="4,6">
+
+                                    <StackPanel Grid.Column="0" Spacing="1">
+                                        <TextBlock Text="{Binding Username}"
+                                                   Foreground="#DDDDEE" FontSize="13" FontWeight="Bold"/>
+                                        <TextBlock FontSize="10" Foreground="#8888A0">
+                                            <Run Text="{i18n:Tr users.list.last_login}"/>
+                                            <Run Text="{Binding LastLoginText}"/>
+                                        </TextBlock>
+                                    </StackPanel>
+
+                                    <ComboBox Grid.Column="1"
+                                              ItemsSource="{ReflectionBinding $parent[Window].DataContext.Users.Roles}"
+                                              SelectedItem="{Binding Role}"
+                                              MinWidth="110" Margin="8,0"/>
+
+                                    <CheckBox Grid.Column="2"
+                                              Content="{i18n:Tr users.list.enabled}"
+                                              IsChecked="{Binding Enabled}"
+                                              VerticalAlignment="Center" Margin="8,0"/>
+
+                                    <Button Grid.Column="3" Content="{i18n:Tr users.action.reset_password}"
+                                            Padding="8,3" FontSize="11"
+                                            Command="{ReflectionBinding $parent[Window].DataContext.Users.ResetPasswordCommand}"
+                                            CommandParameter="{Binding}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <TextBlock Grid.Row="1"
+                               Text="{Binding Users.Message}"
+                               Foreground="{Binding Users.MessageBrush}" FontSize="11"
+                               TextWrapping="Wrap" Margin="0,4,0,4"
+                               IsVisible="{Binding Users.Message, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8" Margin="0,6,0,0">
+                        <Button Content="{i18n:Tr users.action.add}"
+                                Command="{Binding Users.AddCommand}"/>
+                        <Button Content="{i18n:Tr history.refresh}"
+                                Command="{Binding Users.LoadCommand}"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <!-- ── 12. O programie ───────────────────────────────────────────── -->
+            <TabItem Header="{i18n:Tr settings.tab.about}">
+                <ScrollViewer>
+                    <StackPanel Margin="16,10" Spacing="10">
+
+                        <TextBlock Text="{i18n:Tr settings.about.app_title}" FontSize="16" FontWeight="SemiBold"/>
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="{i18n:Tr settings.about.version}" FontSize="11" Foreground="Gray"/>
+                            <TextBlock Text="{Binding AppVersionText}" FontSize="11"/>
+                        </StackPanel>
+
+                        <Border Background="#0A0A15" CornerRadius="4" Padding="12,10" Margin="0,8,0,0">
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.about.license_rdm_title}" FontSize="12" Foreground="#4AB5FF" FontWeight="SemiBold"/>
+                                <TextBlock Text="{i18n:Tr settings.about.license_rdm_text}" FontSize="11" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Background="#0A0A15" CornerRadius="4" Padding="12,10">
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="{i18n:Tr settings.about.license_bass_title}" FontSize="12" Foreground="#4AB5FF" FontWeight="SemiBold"/>
+                                <TextBlock Text="{i18n:Tr settings.about.license_bass_text}" FontSize="11" TextWrapping="Wrap"/>
+                                <TextBlock Text="{i18n:Tr settings.about.license_bass_commercial}" FontSize="11" Foreground="#FF9800" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                                <TextBlock Text="{i18n:Tr settings.about.license_bass_link}" FontSize="11" Foreground="#4AB5FF" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock Text="{i18n:Tr settings.about.copyright}" FontSize="10" Foreground="#606070" Margin="0,8,0,0"/>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+        </TabControl>
+
+        <!-- ═══ Bottom bar ════════════════════════════════════════════════════════ -->
+        <Border Grid.Row="1" Background="#0D0D1A" Padding="12,7"
+                BorderThickness="0,1,0,0" BorderBrush="#1C1C2E">
+            <Grid ColumnDefinitions="*,Auto,Auto">
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding StatusMessage}"
+                               FontSize="11" Foreground="Gray"
+                               VerticalAlignment="Center" />
+                    <TextBlock Text="{i18n:Tr common.loading}"
+                               IsVisible="{Binding IsBusy}"
+                               FontSize="11" Foreground="#4AB5FF"
+                               VerticalAlignment="Center" />
+                </StackPanel>
+
+                <Button Grid.Column="1"
+                        Content="{i18n:Tr common.cancel}"
+                        Padding="14,6" Margin="0,0,8,0"
+                        x:Name="CancelButton" />
+
+                <Button Grid.Column="2"
+                        Content="{i18n:Tr settings.save}"
+                        Command="{Binding SaveCommand}"
+                        IsEnabled="{Binding !IsBusy}"
+                        Padding="16,6"
+                        Background="#204020" Foreground="White" />
+
+            </Grid>
+        </Border>
+
+    </Grid>
+
+</Window>

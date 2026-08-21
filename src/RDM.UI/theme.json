@@ -1,0 +1,42 @@
+{
+  "version": "1.0",
+  "comment": "Color theme — all values are #AARRGGBB hex. Change and restart to apply.",
+  "formats": {
+    "Jingle":    "#FF1B5E20",
+    "Music":     "#0518962E",
+    "Sweeper":   "#FFBF360C",
+    "Commercial": "#FFB71C1C",
+    "News":      "#FF6A1B9A",
+    "Voiceover": "#FF1C1C2E",
+    "Promo":     "#FF1C1C2E",
+    "Podcast":   "#FF1C1C2E",
+    "Effect":    "#FF1C1C2E",
+    "Other":     "#F3C2112E"
+  },
+  "playlist": {
+    "track_background":    "#00000000",
+    "dummy_background":    "#FF332A00",
+    "sweeper_background":  "#FF00233A",
+    "cart_background":     "#FF331A00",
+    "playing_border":      "#FF4CAF50",
+    "next_background":     "#FF1A1A2E",
+    "eta_brush":           "#FF4AB5FF",
+    "eta_stopped_brush":   "#FF606070",
+    "intro_brush":         "#FF5DDC8A",
+    "outro_brush":         "#FFE07B53"
+  },
+  "player": {
+    "connected_foreground":    "#FF4CAF50",
+    "disconnected_foreground": "#FFF44336"
+  },
+  "waveform": {
+    "intro_zone":    "#FFAAAAAA",
+    "vocal_zone":    "#FF5DDC8A",
+    "outro_zone":    "#FFFF8C42",
+    "unplayed":      "#FF333344",
+    "marker_intro":  "#FF4AB5FF",
+    "marker_outro":  "#FFFF8C42",
+    "marker_hook":   "#FFFFFFFF",
+    "marker_custom": "#FFFFFFFF"
+  }
+}

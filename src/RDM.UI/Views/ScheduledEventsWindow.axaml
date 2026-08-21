@@ -1,0 +1,595 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RDM.UI.ViewModels"
+        xmlns:i18n="using:RDM.UI.Localization"
+        x:Class="RDM.UI.Views.ScheduledEventsWindow"
+        Icon="avares://RDM/Assets/rdm.ico"
+        x:DataType="vm:ScheduledEventsViewModel"
+        Title="{i18n:Tr se.title}"
+        Width="1140" Height="660"
+        WindowStartupLocation="CenterOwner"
+        CanResize="True"
+        MinWidth="760" MinHeight="440">
+
+    <Grid ColumnDefinitions="460,4,*">
+
+        <!-- ═══ LEFT: Event list ══════════════════════════════════════════════════ -->
+        <Grid Grid.Column="0" RowDefinitions="Auto,Auto,Auto,*,Auto">
+
+            <!-- Toolbar -->
+            <Border Grid.Row="0" Background="#0D0D1A" Padding="6,5"
+                    BorderThickness="0,0,0,1" BorderBrush="#1C1C2E">
+                <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                    <Button Grid.Column="0"
+                            Content="{i18n:Tr se.new_event}"
+                            Command="{Binding NewEventCommand}"
+                            Padding="10,4" Margin="0,0,4,0" FontSize="12" />
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding StatusMessage}"
+                               FontSize="11" Foreground="Gray"
+                               VerticalAlignment="Center" Margin="4,0" />
+                    <TextBlock Grid.Column="2"
+                               Text="{i18n:Tr common.loading}"
+                               IsVisible="{Binding IsBusy}"
+                               FontSize="11" Foreground="#4AB5FF"
+                               VerticalAlignment="Center" Margin="0,0,6,0" />
+                    <Button Grid.Column="3"
+                            Content="🔄"
+                            Command="{Binding LoadEventsCommand}"
+                            IsEnabled="{Binding !IsBusy}"
+                            Padding="8,4"
+                            ToolTip.Tip="{i18n:Tr se.tip.refresh}" />
+                </Grid>
+            </Border>
+
+            <!-- Filters: day + category + status ─────────────────────────── -->
+            <Border Grid.Row="1" Background="#0D0D1A" Padding="6,6"
+                    BorderThickness="0,0,0,1" BorderBrush="#1C1C2E">
+                <WrapPanel Orientation="Horizontal">
+                    <CalendarDatePicker SelectedDate="{Binding FilterDate}"
+                                        IsEnabled="{Binding !ShowAllDates}"
+                                        Width="150" FontSize="12" Margin="0,0,6,4" />
+                    <CheckBox Content="{i18n:Tr se.all_dates}"
+                              IsChecked="{Binding ShowAllDates}"
+                              FontSize="12" VerticalAlignment="Center" Margin="0,0,10,4" />
+                    <ComboBox ItemsSource="{Binding CategoryFilters}"
+                              SelectedItem="{Binding SelectedCategoryFilter}"
+                              Width="180" FontSize="12" Margin="0,0,6,4" />
+                    <ComboBox ItemsSource="{Binding StatusFilters}"
+                              SelectedItem="{Binding SelectedStatusFilter}"
+                              Width="120" FontSize="12" Margin="0,0,0,4" />
+                </WrapPanel>
+            </Border>
+
+            <!-- Column headers -->
+            <Grid Grid.Row="2"
+                  ColumnDefinitions="90,*,64,60"
+                  Background="#131320" Margin="0,0,0,1">
+                <TextBlock Grid.Column="0" Text="{i18n:Tr se.col.hours}"  FontSize="10" Foreground="Gray" Margin="8,4" />
+                <TextBlock Grid.Column="1" Text="{i18n:Tr se.col.name}"    FontSize="10" Foreground="Gray" Margin="4,4" />
+                <TextBlock Grid.Column="2" Text="{i18n:Tr tm.col.type}"      FontSize="10" Foreground="Gray" Margin="4,4" />
+                <TextBlock Grid.Column="3" Text="Status"   FontSize="10" Foreground="Gray" Margin="4,4" />
+            </Grid>
+
+            <!-- Event list -->
+            <ListBox Grid.Row="3"
+                     ItemsSource="{Binding FilteredItems}"
+                     SelectedItem="{Binding SelectedEvent}"
+                     Background="#0F0F1A"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+
+                <ListBox.Styles>
+                    <Style Selector="ListBoxItem">
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="Margin"  Value="0,1,0,0" />
+                    </Style>
+                </ListBox.Styles>
+
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ScheduledEventRowViewModel">
+                        <Grid ColumnDefinitions="90,*,64,60"
+                              MinHeight="36" VerticalAlignment="Center"
+                              Background="Transparent">
+
+                            <Grid.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="{i18n:Tr se.ctx.edit}"
+                                              Command="{ReflectionBinding $parent[Window].DataContext.EditEventCommand}" />
+                                    <Separator />
+                                    <MenuItem Header="{i18n:Tr se.ctx.toggle}"
+                                              Command="{ReflectionBinding $parent[Window].DataContext.ToggleEnabledCommand}" />
+                                    <MenuItem Header="{i18n:Tr se.ctx.skip_next}"
+                                              Command="{ReflectionBinding $parent[Window].DataContext.ToggleSkipNextCommand}" />
+                                    <Separator />
+                                    <MenuItem Header="{i18n:Tr se.ctx.delete}"
+                                              Command="{ReflectionBinding $parent[Window].DataContext.DeleteEventCommand}" />
+                                </ContextMenu>
+                            </Grid.ContextMenu>
+
+                            <!-- Hours -->
+                            <TextBlock Grid.Column="0"
+                                       Text="{Binding HoursText}"
+                                       FontSize="10" Margin="8,0"
+                                       VerticalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis"
+                                       Foreground="LightGray" />
+
+                            <!-- Name + category + days -->
+                            <StackPanel Grid.Column="1" Margin="4,4" VerticalAlignment="Center" Spacing="2">
+                                <TextBlock Text="{Binding Name}"
+                                           FontSize="12" FontWeight="SemiBold"
+                                           TextTrimming="CharacterEllipsis" />
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <TextBlock Text="{Binding DaysText}"
+                                               FontSize="10" Foreground="#4AB5FF"
+                                               IsVisible="{Binding DaysText, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                    <TextBlock Text="{Binding Category}"
+                                               FontSize="10" Foreground="Gray"
+                                               TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- Type -->
+                            <TextBlock Grid.Column="2"
+                                       Text="{Binding EventType}"
+                                       FontSize="10" Margin="4,0"
+                                       VerticalAlignment="Center"
+                                       Foreground="Gray" />
+
+                            <!-- Status badge -->
+                            <StackPanel Grid.Column="3" Margin="4,0"
+                                        VerticalAlignment="Center" Spacing="2">
+                                <TextBlock Text="{Binding EnabledText}"
+                                           FontSize="9" FontWeight="Bold"
+                                           Foreground="{Binding EnabledColor}" />
+                                <TextBlock Text="{Binding SkipNextText}"
+                                           FontSize="9" Foreground="#FF9800"
+                                           IsVisible="{Binding SkipNext}" />
+                            </StackPanel>
+
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+
+            </ListBox>
+
+            <!-- Quick-action bar — always visible; buttons disable without a selection -->
+            <Border Grid.Row="4" Background="#0D0D1A" Padding="6,5"
+                    BorderThickness="0,1,0,0" BorderBrush="#1C1C2E">
+                <StackPanel Orientation="Horizontal" Spacing="4"
+                            IsEnabled="{Binding SelectedEvent, Converter={x:Static ObjectConverters.IsNotNull}}">
+                    <Button Content="{i18n:Tr se.edit}"
+                            Command="{Binding EditEventCommand}"
+                            Padding="10,4" FontSize="11" />
+                    <Button Content="{i18n:Tr se.skip}"
+                            Command="{Binding ToggleSkipNextCommand}"
+                            Padding="10,4" FontSize="11"
+                            ToolTip.Tip="{i18n:Tr se.tip.skip}" />
+                    <Button Content="{i18n:Tr se.toggle}"
+                            Command="{Binding ToggleEnabledCommand}"
+                            Padding="10,4" FontSize="11" />
+                    <Button Content="{i18n:Tr se.delete}"
+                            Command="{Binding DeleteEventCommand}"
+                            Padding="10,4" FontSize="11"
+                            Foreground="#FF6B6B"
+                            ToolTip.Tip="{i18n:Tr se.tip.delete}" />
+                </StackPanel>
+            </Border>
+
+        </Grid>
+
+        <!-- GridSplitter -->
+        <GridSplitter Grid.Column="1" Width="4" Background="#1C1C2E" />
+
+        <!-- ═══ RIGHT: Editor / placeholder ══════════════════════════════════════ -->
+        <Grid Grid.Column="2">
+
+            <!-- Placeholder when no editor is open -->
+            <Border IsVisible="{Binding !IsEditorVisible}"
+                    Background="#0A0A15">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
+                    <TextBlock Text="📅"
+                               FontSize="40"
+                               HorizontalAlignment="Center"
+                               Opacity="0.3" />
+                    <TextBlock Text="{i18n:Tr se.placeholder}"
+                               FontSize="13" Foreground="#444455"
+                               HorizontalAlignment="Center" />
+                </StackPanel>
+            </Border>
+
+            <!-- Editor form -->
+            <Grid IsVisible="{Binding IsEditorVisible}"
+                  RowDefinitions="Auto,*,Auto">
+
+                <!-- Editor header -->
+                <Border Grid.Row="0" Background="#0D0D1A" Padding="10,8"
+                        BorderThickness="0,0,0,1" BorderBrush="#1C1C2E">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Grid.Column="0"
+                                   Text="{Binding EditorHeader}"
+                                   FontSize="13" FontWeight="SemiBold"
+                                   VerticalAlignment="Center" />
+                        <Button Grid.Column="1"
+                                Content="✕"
+                                Command="{Binding CancelEditCommand}"
+                                Padding="8,4" Background="Transparent" />
+                    </Grid>
+                </Border>
+
+                <!-- Scrollable form -->
+                <ScrollViewer Grid.Row="1" Background="#0B0B18">
+                    <StackPanel Margin="14,10" Spacing="10">
+
+                        <!-- Name -->
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{i18n:Tr se.f.name}" FontSize="11" Foreground="Gray" />
+                            <TextBox Text="{Binding EditorName}"
+                                     Watermark="{i18n:Tr se.f.name_wm}"
+                                     Padding="6,4" FontSize="12" />
+                        </StackPanel>
+
+                        <!-- Type + Category -->
+                        <Grid ColumnDefinitions="*,8,*">
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="{i18n:Tr se.f.type}" FontSize="11" Foreground="Gray" />
+                                <ComboBox ItemsSource="{Binding EventTypes}"
+                                          SelectedItem="{Binding EditorEventType}"
+                                          HorizontalAlignment="Stretch" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Spacing="4">
+                                <TextBlock Text="{i18n:Tr tm.col.category}" FontSize="11" Foreground="Gray" />
+                                <TextBox Text="{Binding EditorCategory}"
+                                         Watermark="{i18n:Tr se.f.category_wm}"
+                                         Padding="6,4" />
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Enabled + SmartTiming -->
+                        <StackPanel Orientation="Horizontal" Spacing="20">
+                            <CheckBox Content="{i18n:Tr se.f.enabled}"
+                                      IsChecked="{Binding EditorEnabled}"
+                                      FontSize="12" />
+                            <CheckBox Content="{i18n:Tr se.f.smart_timing}"
+                                      IsChecked="{Binding EditorSmartTiming}"
+                                      FontSize="12" />
+                        </StackPanel>
+
+                        <!-- Date (only for OneTime) -->
+                        <StackPanel Spacing="4" IsVisible="{Binding IsOneTimeType}">
+                            <TextBlock Text="{i18n:Tr se.f.date}" FontSize="11" Foreground="Gray" />
+                            <CalendarDatePicker SelectedDate="{Binding EditorOnlyOnDate}"
+                                                Width="180" HorizontalAlignment="Left" />
+                        </StackPanel>
+
+                        <!-- EventHour -->
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{i18n:Tr se.f.hour_desc}"
+                                       FontSize="11" Foreground="Gray" TextWrapping="Wrap" />
+                            <TextBox Text="{Binding EditorEventHour}"
+                                     Watermark="13:18:30"
+                                     Width="120"
+                                     HorizontalAlignment="Left"
+                                     Padding="6,4" />
+                        </StackPanel>
+
+                        <!-- Days of week (only for Repeat) -->
+                        <StackPanel Spacing="4" IsVisible="{Binding IsRepeatType}">
+                            <TextBlock Text="{i18n:Tr se.f.days}" FontSize="11" Foreground="Gray" />
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <CheckBox Content="{i18n:Tr se.day.mon}" IsChecked="{Binding DayMon}" />
+                                <CheckBox Content="{i18n:Tr se.day.tue}" IsChecked="{Binding DayTue}" />
+                                <CheckBox Content="{i18n:Tr se.day.wed}" IsChecked="{Binding DayWed}" />
+                                <CheckBox Content="{i18n:Tr se.day.thu}" IsChecked="{Binding DayThu}" />
+                                <CheckBox Content="{i18n:Tr se.day.fri}" IsChecked="{Binding DayFri}" />
+                                <CheckBox Content="{i18n:Tr se.day.sat}" IsChecked="{Binding DaySat}" />
+                                <CheckBox Content="{i18n:Tr se.day.sun}" IsChecked="{Binding DaySun}" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Active hours (only for Repeat) -->
+                        <StackPanel Spacing="4" IsVisible="{Binding IsRepeatType}">
+                            <TextBlock Text="{i18n:Tr se.f.active_hours}" FontSize="11" Foreground="Gray" />
+                            <ItemsControl ItemsSource="{Binding EditorHours}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:HourItemViewModel">
+                                        <CheckBox Content="{Binding Label}"
+                                                  IsChecked="{Binding IsSelected}"
+                                                  MinWidth="46" Margin="0,0,2,2" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+
+                        <!-- Actions -->
+                        <StackPanel Spacing="6">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock Grid.Column="0"
+                                           Text="{i18n:Tr se.f.actions}"
+                                           FontSize="11" Foreground="Gray"
+                                           VerticalAlignment="Center" />
+                                <Button Grid.Column="1"
+                                        Content="{i18n:Tr se.add_action}"
+                                        Command="{Binding AddActionCommand}"
+                                        Padding="8,3" FontSize="11" />
+                            </Grid>
+
+                            <!-- Action sequence -->
+                            <ItemsControl ItemsSource="{Binding EditorActions}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:ActionItemViewModel">
+                                        <Border Background="#111120" CornerRadius="4"
+                                                BorderThickness="1" BorderBrush="#20203A"
+                                                Padding="8,6" Margin="0,3">
+                                            <StackPanel Spacing="6">
+
+                                                <!-- Header: ordinal + summary + reorder/dup/remove -->
+                                                <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto">
+                                                    <Border Grid.Column="0"
+                                                            Background="#1E2A4A" CornerRadius="10"
+                                                            Width="20" Height="20" Margin="0,0,6,0">
+                                                        <TextBlock Text="{Binding Index}"
+                                                                   FontSize="11" FontWeight="Bold"
+                                                                   Foreground="#8FB8FF"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center" />
+                                                    </Border>
+                                                    <TextBlock Grid.Column="1"
+                                                               Text="{Binding Summary}"
+                                                               FontSize="11" FontWeight="SemiBold"
+                                                               TextTrimming="CharacterEllipsis"
+                                                               VerticalAlignment="Center" />
+                                                    <Button Grid.Column="2" Content="▲"
+                                                            Command="{ReflectionBinding $parent[Window].DataContext.MoveActionUpCommand}"
+                                                            CommandParameter="{Binding}"
+                                                            Padding="5,2" FontSize="9" Background="Transparent"
+                                                            ToolTip.Tip="{i18n:Tr se.tip.up}" />
+                                                    <Button Grid.Column="3" Content="▼"
+                                                            Command="{ReflectionBinding $parent[Window].DataContext.MoveActionDownCommand}"
+                                                            CommandParameter="{Binding}"
+                                                            Padding="5,2" FontSize="9" Background="Transparent"
+                                                            ToolTip.Tip="{i18n:Tr se.tip.down}" />
+                                                    <Button Grid.Column="4" Content="⧉"
+                                                            Command="{ReflectionBinding $parent[Window].DataContext.DuplicateActionCommand}"
+                                                            CommandParameter="{Binding}"
+                                                            Padding="5,2" FontSize="11" Background="Transparent"
+                                                            ToolTip.Tip="{i18n:Tr se.tip.duplicate}" />
+                                                    <Button Grid.Column="5" Content="🗑"
+                                                            Command="{ReflectionBinding $parent[Window].DataContext.RemoveActionCommand}"
+                                                            CommandParameter="{Binding}"
+                                                            Padding="5,2" FontSize="11"
+                                                            Foreground="#FF6B6B" Background="Transparent"
+                                                            ToolTip.Tip="{i18n:Tr common.delete}" />
+                                                </Grid>
+
+                                                <!-- Group + type pickers -->
+                                                <Grid ColumnDefinitions="*,6,*">
+                                                    <ComboBox Grid.Column="0"
+                                                              ItemsSource="{x:Static vm:ActionItemViewModel.Groups}"
+                                                              SelectedItem="{Binding SelectedGroup}"
+                                                              HorizontalAlignment="Stretch" FontSize="12" />
+                                                    <ComboBox Grid.Column="2"
+                                                              ItemsSource="{Binding TypeOptions}"
+                                                              SelectedItem="{Binding SelectedType}"
+                                                              HorizontalAlignment="Stretch" FontSize="12" />
+                                                </Grid>
+
+                                                <!-- Parameters (per action type) -->
+
+                                                <!-- Mode -->
+                                                <StackPanel Spacing="3" IsVisible="{Binding IsMode}">
+                                                    <TextBlock Text="{i18n:Tr se.f.playlist_mode}" FontSize="10" Foreground="Gray" />
+                                                    <ComboBox ItemsSource="{x:Static vm:ActionItemViewModel.PlaylistModes}"
+                                                              SelectedItem="{Binding PlaylistMode}"
+                                                              HorizontalAlignment="Stretch" />
+                                                </StackPanel>
+
+                                                <!-- Sweeper category -->
+                                                <StackPanel Spacing="3" IsVisible="{Binding IsCategory}">
+                                                    <TextBlock Text="{i18n:Tr se.f.sweeper_cat}" FontSize="10" Foreground="Gray" />
+                                                    <TextBox Text="{Binding CategoryName}" Watermark="{i18n:Tr se.f.sweeper_cat_wm}" Padding="6,4" />
+                                                </StackPanel>
+
+                                                <!-- Sweeper subcategory -->
+                                                <StackPanel Spacing="3" IsVisible="{Binding IsSweeperSubcategory}">
+                                                    <TextBlock Text="{i18n:Tr se.f.sweeper_subcat}" FontSize="10" Foreground="Gray" />
+                                                    <TextBox Text="{Binding SweeperSubcategoryName}" Watermark="{i18n:Tr se.f.sweeper_subcat_wm}" Padding="6,4" />
+                                                </StackPanel>
+
+                                                <!-- Asset (picked from library, filtered search) -->
+                                                <StackPanel Spacing="3" IsVisible="{Binding IsAsset}">
+                                                    <TextBlock Text="{i18n:Tr se.f.asset}" FontSize="10" Foreground="Gray" />
+                                                    <Grid ColumnDefinitions="*,6,Auto">
+                                                        <Border Grid.Column="0" Background="#161626"
+                                                                BorderBrush="#2A2A44" BorderThickness="1"
+                                                                CornerRadius="3" Padding="6,4">
+                                                            <TextBlock Text="{Binding AssetDisplayText}"
+                                                                       FontSize="12" VerticalAlignment="Center"
+                                                                       TextTrimming="CharacterEllipsis" />
+                                                        </Border>
+                                                        <Button Grid.Column="2" Content="{i18n:Tr se.browse_select}"
+                                                                Command="{Binding BrowseAssetCommand}"
+                                                                Padding="8,4" FontSize="11" />
+                                                    </Grid>
+                                                </StackPanel>
+
+                                                <!-- External item -->
+                                                <StackPanel Spacing="3" IsVisible="{Binding IsExternalItem}">
+                                                    <TextBlock Text="{i18n:Tr se.f.file_path}" FontSize="10" Foreground="Gray" />
+                                                    <TextBox Text="{Binding FilePath}" Watermark="C:\...\track.mp3" Padding="6,4" />
+                                                    <Grid ColumnDefinitions="*,6,*">
+                                                        <TextBox Grid.Column="0" Text="{Binding Title}"  Watermark="{i18n:Tr se.f.title_opt}"  Padding="6,4" />
+                                                        <TextBox Grid.Column="2" Text="{Binding Artist}" Watermark="{i18n:Tr se.f.artist_opt}" Padding="6,4" />
+                                                    </Grid>
+                                                </StackPanel>
+
+                                                <!-- Position -->
+                                                <StackPanel Spacing="3" IsVisible="{Binding IsPosition}">
+                                                    <TextBlock Text="{i18n:Tr se.f.position}" FontSize="10" Foreground="Gray" />
+                                                    <TextBox Text="{Binding Position}" Watermark="{i18n:Tr se.wm.eg_zero}" Width="120"
+                                                             HorizontalAlignment="Left" Padding="6,4" />
+                                                </StackPanel>
+
+                                                <!-- Playlist (picked by name, from the database) -->
+                                                <StackPanel Spacing="3" IsVisible="{Binding IsPlaylist}">
+                                                    <TextBlock Text="{i18n:Tr se.f.playlist}" FontSize="10" Foreground="Gray" />
+                                                    <ComboBox ItemsSource="{x:Static vm:ActionItemViewModel.AvailablePlaylists}"
+                                                              SelectedItem="{Binding SelectedPlaylist}"
+                                                              PlaceholderText="{i18n:Tr se.f.playlist_ph}"
+                                                              HorizontalAlignment="Stretch" />
+                                                </StackPanel>
+
+                                                <!-- Item id -->
+                                                <StackPanel Spacing="3" IsVisible="{Binding IsItemId}">
+                                                    <TextBlock Text="{i18n:Tr se.f.item_id}" FontSize="10" Foreground="Gray" />
+                                                    <TextBox Text="{Binding ItemId}" Watermark="item_id…" Padding="6,4" />
+                                                </StackPanel>
+
+                                                <!-- New position (reorder) -->
+                                                <StackPanel Spacing="3" IsVisible="{Binding IsNewPosition}">
+                                                    <TextBlock Text="{i18n:Tr se.f.new_position}" FontSize="10" Foreground="Gray" />
+                                                    <TextBox Text="{Binding NewPosition}" Watermark="{i18n:Tr se.wm.eg_zero}" Width="120"
+                                                             HorizontalAlignment="Left" Padding="6,4" />
+                                                </StackPanel>
+
+                                                <!-- Patch item -->
+                                                <StackPanel Spacing="3" IsVisible="{Binding IsPatch}">
+                                                    <Grid ColumnDefinitions="*,6,*">
+                                                        <StackPanel Grid.Column="0" Spacing="3">
+                                                            <TextBlock Text="Crossfade (ms)" FontSize="10" Foreground="Gray" />
+                                                            <TextBox Text="{Binding CrossfadeMs}" Watermark="—" Padding="6,4" />
+                                                        </StackPanel>
+                                                        <StackPanel Grid.Column="2" Spacing="3">
+                                                            <TextBlock Text="Lead-in (ms)" FontSize="10" Foreground="Gray" />
+                                                            <TextBox Text="{Binding LeadInMs}" Watermark="—" Padding="6,4" />
+                                                        </StackPanel>
+                                                    </Grid>
+                                                    <Grid ColumnDefinitions="*,6,*">
+                                                        <StackPanel Grid.Column="0" Spacing="3">
+                                                            <TextBlock Text="Trim start (ms)" FontSize="10" Foreground="Gray" />
+                                                            <TextBox Text="{Binding TrimStartMs}" Watermark="—" Padding="6,4" />
+                                                        </StackPanel>
+                                                        <StackPanel Grid.Column="2" Spacing="3">
+                                                            <TextBlock Text="Trim end (ms)" FontSize="10" Foreground="Gray" />
+                                                            <TextBox Text="{Binding TrimEndMs}" Watermark="—" Padding="6,4" />
+                                                        </StackPanel>
+                                                    </Grid>
+                                                    <TextBlock Text="{i18n:Tr se.f.segue_type}" FontSize="10" Foreground="Gray" />
+                                                    <ComboBox ItemsSource="{x:Static vm:ActionItemViewModel.SegueTypes}"
+                                                              SelectedItem="{Binding SegueType}"
+                                                              HorizontalAlignment="Stretch" />
+                                                    <CheckBox Content="{i18n:Tr se.f.autolink}" IsChecked="{Binding AutoLinkNext}" FontSize="12" />
+                                                </StackPanel>
+
+                                                <!-- Wait -->
+                                                <StackPanel Spacing="3" IsVisible="{Binding IsWait}">
+                                                    <TextBlock Text="{i18n:Tr se.f.wait}" FontSize="10" Foreground="Gray" />
+                                                    <TextBox Text="{Binding WaitMs}" Watermark="1000" Width="120"
+                                                             HorizontalAlignment="Left" Padding="6,4" />
+                                                </StackPanel>
+
+                                                <!-- Execute file -->
+                                                <StackPanel Spacing="3" IsVisible="{Binding IsExecuteFile}">
+                                                    <TextBlock Text="{i18n:Tr se.f.exec_path}"
+                                                               FontSize="10" Foreground="Gray" />
+                                                    <Grid ColumnDefinitions="*,6,Auto">
+                                                        <TextBox Grid.Column="0" Text="{Binding ExecPath}"
+                                                                 Watermark="C:\scripts\notify.ps1" Padding="6,4" />
+                                                        <Button Grid.Column="2" Content="{i18n:Tr se.browse}"
+                                                                Click="OnBrowseExecPathClicked"
+                                                                Padding="8,4" FontSize="11" />
+                                                    </Grid>
+
+                                                    <TextBlock Text="{i18n:Tr se.f.args}"
+                                                               ToolTip.Tip="{i18n:Tr se.tip.args}"
+                                                               FontSize="10" Foreground="Gray" />
+                                                    <TextBox Text="{Binding ExecArguments}" Watermark="{i18n:Tr se.f.args_wm}" Padding="6,4" />
+
+                                                    <TextBlock Text="{i18n:Tr se.f.workdir}"
+                                                               ToolTip.Tip="{i18n:Tr se.tip.workdir}"
+                                                               FontSize="10" Foreground="Gray" />
+                                                    <TextBox Text="{Binding ExecWorkingDir}" Watermark="C:\scripts" Padding="6,4" />
+                                                    <Grid ColumnDefinitions="Auto,12,*" VerticalAlignment="Center">
+                                                        <StackPanel Grid.Column="0" Spacing="3">
+                                                            <TextBlock Text="Timeout (ms)"
+                                                                       ToolTip.Tip="{i18n:Tr se.tip.timeout}"
+                                                                       FontSize="10" Foreground="Gray" />
+                                                            <TextBox Text="{Binding ExecTimeoutMs}" Watermark="30000" Width="100" Padding="6,4" />
+                                                        </StackPanel>
+                                                        <CheckBox Grid.Column="2" Content="{i18n:Tr se.f.capture}"
+                                                                  ToolTip.Tip="{i18n:Tr se.tip.capture}"
+                                                                  IsChecked="{Binding ExecCaptureOutput}"
+                                                                  FontSize="12" VerticalAlignment="Bottom" />
+                                                    </Grid>
+                                                    <TextBlock Text="{i18n:Tr se.exec_warning}"
+                                                               FontSize="10" Foreground="#C8963C" TextWrapping="Wrap" />
+                                                </StackPanel>
+
+                                                <!-- HTTP call -->
+                                                <StackPanel Spacing="3" IsVisible="{Binding IsHttp}">
+                                                    <Grid ColumnDefinitions="Auto,6,*">
+                                                        <ComboBox Grid.Column="0"
+                                                                  ItemsSource="{x:Static vm:ActionItemViewModel.HttpMethods}"
+                                                                  SelectedItem="{Binding HttpMethod}" Width="100" />
+                                                        <TextBox Grid.Column="2" Text="{Binding HttpUrl}"
+                                                                 Watermark="https://…" Padding="6,4" VerticalAlignment="Center" />
+                                                    </Grid>
+                                                    <TextBlock Text="{i18n:Tr se.f.body}" FontSize="10" Foreground="Gray" />
+                                                    <TextBox Text="{Binding HttpBody}" Watermark="{}{ }" Padding="6,4"
+                                                             AcceptsReturn="True" MaxHeight="80" TextWrapping="Wrap" />
+                                                    <TextBlock Text="Timeout (ms)" FontSize="10" Foreground="Gray" />
+                                                    <TextBox Text="{Binding HttpTimeoutMs}" Watermark="30000" Width="100"
+                                                             HorizontalAlignment="Left" Padding="6,4" />
+                                                    <TextBlock Text="{i18n:Tr se.exec_warning}"
+                                                               FontSize="10" Foreground="#C8963C" TextWrapping="Wrap" />
+                                                </StackPanel>
+
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <TextBlock Text="{i18n:Tr se.no_actions}"
+                                       IsVisible="{Binding HasNoActions}"
+                                       FontSize="11" Foreground="#444455"
+                                       HorizontalAlignment="Center" Margin="0,8" />
+
+                        </StackPanel>
+
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- Save / Cancel -->
+                <Border Grid.Row="2" Background="#0D0D1A" Padding="10,7"
+                        BorderThickness="0,1,0,0" BorderBrush="#1C1C2E">
+                    <Grid ColumnDefinitions="*,Auto,Auto">
+                        <TextBlock Grid.Column="0"
+                                   Text="{Binding StatusMessage}"
+                                   FontSize="11" Foreground="Gray"
+                                   VerticalAlignment="Center" />
+                        <Button Grid.Column="1"
+                                Content="{i18n:Tr common.cancel}"
+                                Command="{Binding CancelEditCommand}"
+                                Padding="12,6" Margin="0,0,6,0" />
+                        <Button Grid.Column="2"
+                                Content="{i18n:Tr settings.save}"
+                                Command="{Binding SaveEventCommand}"
+                                IsEnabled="{Binding !IsBusy}"
+                                Padding="14,6"
+                                Background="#204020" Foreground="White" />
+                    </Grid>
+                </Border>
+
+            </Grid>
+
+        </Grid>
+
+    </Grid>
+
+</Window>

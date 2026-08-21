@@ -1,0 +1,80 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i18n="using:RDM.UI.Localization"
+        x:Class="RDM.UI.Views.LoginWindow"
+        Title="{i18n:Tr lg.title}"
+        Icon="avares://RDM/Assets/rdm.ico"
+        Width="360" Height="330"
+        WindowStartupLocation="CenterScreen"
+        CanResize="False">
+
+    <!-- Enter key triggers LoginCommand from anywhere in the window -->
+    <Window.KeyBindings>
+        <KeyBinding Gesture="Return" Command="{Binding LoginCommand}" />
+    </Window.KeyBindings>
+
+    <DockPanel Margin="32">
+
+        <!-- Title -->
+        <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="0 0 0 24">
+            <TextBlock Text="RDM Radio Digital Manager"
+                       FontSize="16" FontWeight="Bold"
+                       HorizontalAlignment="Center" />
+            <TextBlock Text="{i18n:Tr lg.subtitle}"
+                       FontSize="12" Opacity="0.6"
+                       HorizontalAlignment="Center" />
+        </StackPanel>
+
+        <!-- Buttons -->
+        <StackPanel DockPanel.Dock="Bottom" Spacing="8">
+
+            <!-- Progress indicator — visible only while authenticating -->
+            <ProgressBar IsIndeterminate="True"
+                         IsVisible="{Binding IsLoggingIn}"
+                         Height="2" />
+
+            <Button Content="{i18n:Tr lg.login}"
+                    Command="{Binding LoginCommand}"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center"
+                    IsDefault="True" />
+
+            <Button Content="{i18n:Tr common.cancel}"
+                    Command="{Binding CancelCommand}"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center" />
+
+        </StackPanel>
+
+        <!-- Form -->
+        <StackPanel Spacing="10">
+
+            <TextBox Text="{Binding Username}"
+                     Watermark="{i18n:Tr lg.username}"
+                     IsEnabled="{Binding !IsLoggingIn}" />
+
+            <TextBox Text="{Binding Password}"
+                     Watermark="{i18n:Tr lg.password}"
+                     PasswordChar="●"
+                     IsEnabled="{Binding !IsLoggingIn}" />
+
+            <CheckBox Content="{i18n:Tr lg.remember}"
+                      IsChecked="{Binding RememberMe}"
+                      FontSize="12" />
+
+            <!-- Error message — only visible when HasError is true -->
+            <Border Background="#331A1A"
+                    CornerRadius="4"
+                    Padding="10 8"
+                    IsVisible="{Binding HasError}">
+                <TextBlock Text="{Binding ErrorMessage}"
+                           Foreground="#FF6B6B"
+                           TextWrapping="Wrap"
+                           FontSize="12" />
+            </Border>
+
+        </StackPanel>
+
+    </DockPanel>
+
+</Window>

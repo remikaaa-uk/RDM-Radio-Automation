@@ -1,0 +1,32 @@
+# Build output
+bin/
+obj/
+installer/publish/
+installer/Output/
+
+# IDE / tooling
+.vs/
+*.user
+
+# Runtime logs
+rdm.log
+*.log
+
+# Secrets — real local config, never committed
+src/RDM.UI/rdm.config.json
+src/RDM.API/rdm.config.json
+
+# BASS binaries (un4seen license — see bass_setup.md, not redistributed here)
+libs/*.dll
+
+# Internal working notes / audits — not part of the published project
+/audyt-16-07-2026.md
+/audyt-bezpieczenstwo-jakosc-16-07-2026.md
+/bass_setup.md
+/uwagi.md
+/update_tracks.md
+/instrukcja1_RDM.md
+/github.md
+/PresenterBreak_Specyfikacja.md
+docs/wfrm.md
+installer/

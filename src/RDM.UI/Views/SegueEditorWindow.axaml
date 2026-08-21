@@ -1,0 +1,317 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RDM.UI.ViewModels"
+        xmlns:ctrl="using:RDM.UI.Controls"
+        xmlns:i18n="using:RDM.UI.Localization"
+        x:Class="RDM.UI.Views.SegueEditorWindow"
+        Icon="avares://RDM/Assets/rdm.ico"
+        x:DataType="vm:SegueEditorViewModel"
+        Title="{i18n:Tr sg.title}"
+        Width="1050" Height="640"
+        MinWidth="820" MinHeight="460"
+        WindowStartupLocation="CenterOwner"
+        CanResize="True"
+        Background="#0B0B18">
+
+    <Window.Styles>
+        <Style Selector="Button.vtarmed">
+            <Setter Property="Background"        Value="#2A0A0A"/>
+            <Setter Property="Foreground"        Value="#FF9999"/>
+            <Setter Property="BorderBrush"       Value="#CC3333"/>
+            <Setter Property="BorderThickness"   Value="1"/>
+        </Style>
+        <Style Selector="Button.vtarmed:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#3A1010"/>
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="56,*,54,40,46">
+
+        <!-- ── Row 0: Track info ─────────────────────────────────────────── -->
+        <Grid Grid.Row="0" Background="#0D0D1A"
+              ColumnDefinitions="*,190,*">
+
+            <StackPanel Grid.Column="0" Margin="14,6" VerticalAlignment="Center">
+                <TextBlock Text="{Binding Track1Artist}"
+                           FontSize="10" Foreground="#7777AA"/>
+                <TextBlock Text="{Binding Track1Title}"
+                           FontSize="13" FontWeight="Bold"
+                           TextTrimming="CharacterEllipsis"/>
+            </StackPanel>
+
+            <Border Grid.Column="1" Background="#131320"
+                    Margin="8,8" CornerRadius="4">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="1">
+                    <TextBlock Text="CROSSFADE" FontSize="9"
+                               Foreground="#555577" HorizontalAlignment="Center"
+                               LetterSpacing="1"/>
+                    <TextBlock Text="{Binding CrossfadeText}"
+                               FontSize="18" FontWeight="Bold"
+                               Foreground="#4AB5FF"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+
+            <StackPanel Grid.Column="2" Margin="14,6" VerticalAlignment="Center"
+                        HorizontalAlignment="Right">
+                <TextBlock Text="{Binding Track2Artist}"
+                           FontSize="10" Foreground="#7777AA"
+                           HorizontalAlignment="Right"/>
+                <TextBlock Text="{Binding Track2Title}"
+                           FontSize="13" FontWeight="Bold"
+                           TextTrimming="CharacterEllipsis"
+                           HorizontalAlignment="Right"/>
+            </StackPanel>
+
+        </Grid>
+
+        <!-- ── Row 1: Timeline ───────────────────────────────────────────── -->
+        <ctrl:SegueTimelineControl
+            Grid.Row="1"
+            x:Name="Timeline"
+            Clips="{Binding Clips}"
+            FocusCenterMs="{Binding TimelineFocusMs}"
+            PlayheadMs="{Binding PreviewPositionMs}"
+            IsVtMode="{Binding IsVtMode}"/>
+
+        <!-- ── Row 2: Sliders ────────────────────────────────────────────── -->
+        <Border Grid.Row="2" Background="#0D0D1A" Padding="14,7">
+            <Grid ColumnDefinitions="*,28,*">
+
+                <Grid Grid.Column="0" ColumnDefinitions="116,*,96">
+                    <TextBlock Text="Crossfade:"
+                               VerticalAlignment="Center" FontSize="11"
+                               Foreground="#AAAACC"/>
+                    <Slider Grid.Column="1"
+                            Minimum="0" Maximum="10000"
+                            Value="{Binding CrossfadeMs}"
+                            TickFrequency="500"
+                            Margin="8,0"/>
+                    <TextBlock Grid.Column="2"
+                               Text="{Binding CrossfadeText}"
+                               VerticalAlignment="Center" FontSize="11"
+                               Foreground="#4AB5FF" HorizontalAlignment="Right"/>
+                </Grid>
+
+                <Grid Grid.Column="2" ColumnDefinitions="120,*,130">
+                    <TextBlock Text="Trim end T1:"
+                               VerticalAlignment="Center" FontSize="11"
+                               Foreground="#AAAACC"/>
+                    <Slider Grid.Column="1"
+                            Minimum="0"
+                            Maximum="{Binding Track1DurationMs}"
+                            Value="{Binding TrimEndMs}"
+                            Margin="8,0"/>
+                    <TextBlock Grid.Column="2"
+                               Text="{Binding TrimEndText}"
+                               VerticalAlignment="Center" FontSize="11"
+                               Foreground="#888899" HorizontalAlignment="Right"/>
+                </Grid>
+
+            </Grid>
+        </Border>
+
+        <!-- ── Row 3: Marker jump buttons ───────────────────────────────── -->
+        <Border Grid.Row="3" Background="#08080E"
+                BorderThickness="0,1,0,1" BorderBrush="#16162A"
+                Padding="10,0">
+
+            <StackPanel Orientation="Horizontal" Spacing="3"
+                        VerticalAlignment="Center">
+
+                <!-- Track 1 label -->
+                <TextBlock Text="T1"
+                           FontSize="9" FontWeight="Bold"
+                           Foreground="#444466"
+                           VerticalAlignment="Center"
+                           Margin="0,0,4,0"/>
+
+                <Button Content="Start"
+                        Command="{Binding JumpToT1StartCommand}"
+                        Height="26" Padding="8,0" FontSize="10"
+                        Background="#0A1E0A" Foreground="#44CC44"
+                        BorderBrush="#163016"/>
+                <Button Content="Intro"
+                        Command="{Binding JumpToT1IntroCommand}"
+                        Height="26" Padding="8,0" FontSize="10"
+                        Background="#0A1422" Foreground="#4499CC"
+                        BorderBrush="#122038"/>
+                <Button Content="Outro"
+                        Command="{Binding JumpToT1OutroCommand}"
+                        Height="26" Padding="8,0" FontSize="10"
+                        Background="#221808" Foreground="#CC8833"
+                        BorderBrush="#3A2610"/>
+                <Button Content="Fade Out"
+                        Command="{Binding JumpToT1FadeOutCommand}"
+                        Height="26" Padding="8,0" FontSize="10"
+                        Background="#220808" Foreground="#CC3333"
+                        BorderBrush="#380E0E"/>
+                <Button Content="{i18n:Tr sg.anchor}"
+                        Command="{Binding JumpToT1StartNextCommand}"
+                        Height="26" Padding="8,0" FontSize="10"
+                        Background="#221E06" Foreground="#CCBB33"
+                        BorderBrush="#38300A"/>
+
+                <!-- Divider -->
+                <Rectangle Width="1" Fill="#222233" Margin="8,2"/>
+
+                <!-- Transition point -->
+                <Button Content="{i18n:Tr sg.mix}"
+                        Command="{Binding JumpToTransitionCommand}"
+                        Height="26" Padding="10,0" FontSize="10"
+                        Background="#0C0C28" Foreground="#6666EE"
+                        BorderBrush="#20208A"/>
+
+                <!-- Divider -->
+                <Rectangle Width="1" Fill="#222233" Margin="8,2"/>
+
+                <!-- Track 2 label -->
+                <TextBlock Text="T2"
+                           FontSize="9" FontWeight="Bold"
+                           Foreground="#444466"
+                           VerticalAlignment="Center"
+                           Margin="0,0,4,0"/>
+
+                <Button Content="Start"
+                        Command="{Binding JumpToT2StartCommand}"
+                        Height="26" Padding="8,0" FontSize="10"
+                        Background="#0A1E0A" Foreground="#44CC44"
+                        BorderBrush="#163016"/>
+                <Button Content="Intro"
+                        Command="{Binding JumpToT2IntroCommand}"
+                        Height="26" Padding="8,0" FontSize="10"
+                        Background="#080E18" Foreground="#33AACC"
+                        BorderBrush="#0E1E30"/>
+                <Button Content="Ramp 2"
+                        Command="{Binding JumpToT2Ramp2Command}"
+                        Height="26" Padding="8,0" FontSize="10"
+                        Background="#14142A" Foreground="#8888CC"
+                        BorderBrush="#20204A"/>
+
+                <!-- Divider -->
+                <Rectangle Width="1" Fill="#222233" Margin="8,2"/>
+
+                <!-- Undo / Redo -->
+                <Button Content="↩"
+                        Command="{Binding UndoCommand}"
+                        ToolTip.Tip="{i18n:Tr sg.tip.undo}"
+                        Height="26" Padding="10,0" FontSize="14"/>
+                <Button Content="↪"
+                        Command="{Binding RedoCommand}"
+                        ToolTip.Tip="{i18n:Tr sg.tip.redo}"
+                        Height="26" Padding="10,0" FontSize="14"/>
+
+                <!-- Divider -->
+                <Rectangle Width="1" Fill="#222233" Margin="8,2"/>
+
+                <!-- Zoom -->
+                <Button Content="🔍−"
+                        Click="OnZoomOutClicked"
+                        ToolTip.Tip="{i18n:Tr sg.tip.zoom_out}"
+                        Height="26" Padding="8,0" FontSize="12"/>
+                <Button Content="🔍+"
+                        Click="OnZoomInClicked"
+                        ToolTip.Tip="{i18n:Tr sg.tip.zoom_in}"
+                        Height="26" Padding="8,0" FontSize="12"/>
+                <Button Content="⤢"
+                        Click="OnZoomFitClicked"
+                        ToolTip.Tip="{i18n:Tr sg.tip.zoom_fit}"
+                        Height="26" Padding="10,0" FontSize="13"/>
+
+                <!-- Divider -->
+                <Rectangle Width="1" Fill="#222233" Margin="8,2"/>
+
+                <!-- VT: idle / armed -->
+                <Button Content="🎙 VT"
+                        Command="{Binding ToggleVtModeCommand}"
+                        Classes.vtarmed="{Binding IsVtMode}"
+                        IsEnabled="{Binding !IsVtRecording}"
+                        IsVisible="{Binding !IsVtRecording}"
+                        Height="26" Padding="10,0" FontSize="11"
+                        Background="#100808" Foreground="#AA7777"
+                        BorderBrush="#2A1212"
+                        ToolTip.Tip="{i18n:Tr sg.tip.vt}"/>
+
+                <!-- VT: recording — STOP + poziom + elapsed -->
+                <Button Content="⏹ STOP"
+                        Command="{Binding StopVtRecordingCommand}"
+                        IsVisible="{Binding IsVtRecording}"
+                        Height="26" Padding="10,0" FontSize="11"
+                        Background="#3A0808" Foreground="White"
+                        BorderBrush="#AA2222"
+                        ToolTip.Tip="{i18n:Tr sg.tip.stop_rec}"/>
+                <ProgressBar Value="{Binding VtPeakLevel}"
+                             Maximum="1"
+                             IsVisible="{Binding IsVtRecording}"
+                             Width="72" Height="10"
+                             Margin="5,0"
+                             Foreground="#FF4444"
+                             Background="#1A0606"
+                             VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding VtElapsedText}"
+                           IsVisible="{Binding IsVtRecording}"
+                           FontFamily="Consolas" FontSize="13" FontWeight="Bold"
+                           Foreground="#FF8888"
+                           VerticalAlignment="Center"
+                           Margin="4,0,0,0"/>
+
+            </StackPanel>
+        </Border>
+
+        <!-- ── Row 4: Transport + bottom bar ─────────────────────────────── -->
+        <Border Grid.Row="4" Background="#0D0D1A" Padding="10,6">
+            <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto">
+
+                <!-- PFL transport -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4"
+                            VerticalAlignment="Center">
+                    <Button Content="⏮"
+                            Command="{Binding SkipToStartCommand}"
+                            ToolTip.Tip="{i18n:Tr sg.tip.to_start}"
+                            Height="28" Padding="9,0" FontSize="13"/>
+                    <Button Content="{Binding PreviewPlayPauseIcon}"
+                            Command="{Binding PlayPausePreviewCommand}"
+                            ToolTip.Tip="{i18n:Tr sg.tip.play_pause}"
+                            Height="28" Padding="11,0" FontSize="13"
+                            Background="#13202E" Foreground="#4AB5FF"
+                            BorderBrush="#1E3A52"/>
+                    <Button Content="⏭"
+                            Command="{Binding SkipToEndCommand}"
+                            ToolTip.Tip="{i18n:Tr sg.tip.to_end}"
+                            Height="28" Padding="9,0" FontSize="13"/>
+                </StackPanel>
+
+                <!-- Position / total -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
+                            Margin="12,0,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding PreviewPositionText}"
+                               FontFamily="Consolas" FontSize="15" FontWeight="Bold"
+                               Foreground="#4AB5FF" VerticalAlignment="Center"/>
+                    <TextBlock Text="/" Foreground="#444466" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding PreviewTotalText}"
+                               FontFamily="Consolas" FontSize="13"
+                               Foreground="#888899" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <TextBlock Grid.Column="2"
+                           Text="{Binding StatusMessage}"
+                           VerticalAlignment="Center" Margin="14,0,0,0"
+                           FontSize="11" Foreground="#666677"/>
+
+                <TextBlock Grid.Column="3"
+                           Text="{i18n:Tr sg.unsaved}"
+                           IsVisible="{Binding HasUnsavedChanges}"
+                           Foreground="#FF9800" FontSize="11"
+                           VerticalAlignment="Center" Margin="0,0,6,0"/>
+
+                <Button Grid.Column="4"
+                        Content="{i18n:Tr common.ok}"
+                        Padding="22,6"
+                        Background="#1A3A1A" Foreground="White"
+                        x:Name="OkButton"/>
+
+            </Grid>
+        </Border>
+
+    </Grid>
+</Window>

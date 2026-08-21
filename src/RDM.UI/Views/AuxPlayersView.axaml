@@ -1,0 +1,216 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RDM.UI.ViewModels"
+             xmlns:controls="using:RDM.UI.Controls"
+             xmlns:i18n="using:RDM.UI.Localization"
+             x:Class="RDM.UI.Views.AuxPlayersView"
+             x:DataType="vm:AuxPlayersViewModel">
+
+    <UserControl.Styles>
+        <Style Selector="Button.transport">
+            <Setter Property="MinWidth" Value="56"/>
+            <Setter Property="Padding" Value="6,5"/>
+            <Setter Property="Margin" Value="0,0,4,0"/>
+            <Setter Property="CornerRadius" Value="3"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Button.play">
+            <Setter Property="Background" Value="#2E7D32"/>
+        </Style>
+        <Style Selector="Button.stop">
+            <Setter Property="Background" Value="#C62828"/>
+        </Style>
+        <Style Selector="Button.eject">
+            <Setter Property="Background" Value="#37374E"/>
+        </Style>
+        <Style Selector="Button.toggle">
+            <Setter Property="MinWidth" Value="56"/>
+            <Setter Property="Padding" Value="6,5"/>
+            <Setter Property="Margin" Value="0,0,4,0"/>
+            <Setter Property="CornerRadius" Value="3"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Opacity" Value="0.28"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Button.toggle.active">
+            <Setter Property="Opacity" Value="1.0"/>
+        </Style>
+        <Style Selector="Button.filearea">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+        </Style>
+        <Style Selector="TextBlock.caption">
+            <Setter Property="FontSize" Value="9"/>
+            <Setter Property="Foreground" Value="#6E6E8A"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style Selector="TextBlock.timebig">
+            <Setter Property="FontSize" Value="19"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontFamily" Value="Consolas,Menlo,Monospace"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,*" Background="#0B0B14">
+
+        <!-- ── Header ──────────────────────────────────────────────────────── -->
+        <Grid Grid.Row="0" Background="#10101D" Margin="0,0,0,4">
+            <TextBlock Text="AUX PLAYERS"
+                       FontSize="13" FontWeight="Bold" Foreground="#D7D7E8"
+                       VerticalAlignment="Center" Margin="12,8" />
+        </Grid>
+
+        <!-- ── Players ─────────────────────────────────────────────────────── -->
+        <ScrollViewer Grid.Row="1">
+            <ItemsControl ItemsSource="{Binding Channels}" Margin="6,0,6,0">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:AuxChannelViewModel">
+
+                        <Border Margin="0,0,0,6" CornerRadius="5"
+                                BorderThickness="1" BorderBrush="#22223C"
+                                Background="#12121F" MinHeight="96">
+
+                            <Grid ColumnDefinitions="58,*,86,108,Auto,Auto" Margin="6">
+
+                                <!-- Col 0: AUX badge -->
+                                <Border Grid.Column="0" CornerRadius="4"
+                                        Background="{Binding AccentBrush}"
+                                        Margin="0,0,8,0">
+                                    <StackPanel VerticalAlignment="Center"
+                                                HorizontalAlignment="Center">
+                                        <TextBlock Text="AUX" Foreground="White"
+                                                   FontSize="11" FontWeight="Bold"
+                                                   HorizontalAlignment="Center" Opacity="0.9" />
+                                        <TextBlock Text="{Binding Number}" Foreground="White"
+                                                   FontSize="34" FontWeight="Bold"
+                                                   HorizontalAlignment="Center" />
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Col 1: file info + waveform -->
+                                <Grid Grid.Column="1" RowDefinitions="Auto,*,Auto" Margin="0,2,8,2">
+
+                                    <!-- File header (click to load) -->
+                                    <Button Grid.Row="0" Classes="filearea"
+                                            Command="{Binding LoadCommand}"
+                                            ToolTip.Tip="{i18n:Tr aux.tip.load}">
+                                        <Grid ColumnDefinitions="34,*">
+                                            <Border Grid.Column="0" Width="28" Height="28"
+                                                    CornerRadius="14" Background="{Binding AccentBrush}"
+                                                    HorizontalAlignment="Left" VerticalAlignment="Top">
+                                                <TextBlock Text="♪" Foreground="White" FontSize="15"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                            <StackPanel Grid.Column="1" Spacing="1" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding FileName}"
+                                                           IsVisible="{Binding IsLoaded}"
+                                                           FontSize="12" FontWeight="Bold" Foreground="#E6E6F2"
+                                                           TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Text="{i18n:Tr aux.load_prompt}"
+                                                           IsVisible="{Binding !IsLoaded}"
+                                                           FontSize="12" Foreground="#6E6E8A" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Button>
+
+                                    <!-- Waveform with playhead (played part in the deck colour) -->
+                                    <Border Grid.Row="1" Background="#0C0C16" CornerRadius="3"
+                                            Margin="0,6,0,2" MinHeight="34" ClipToBounds="True">
+                                        <controls:WaveformControl
+                                            Peaks="{Binding WaveformPeaks}"
+                                            DurationMs="{Binding DurationMs}"
+                                            PositionMs="{Binding PositionMs}"
+                                            IntroCueMs="{Binding StartCueMs}"
+                                            OutroCueMs="{Binding EndCueMs}"
+                                            Markers="{Binding CueMarkers}"
+                                            PlayedBrush="{Binding AccentBrush}" />
+                                    </Border>
+
+                                    <TextBlock Grid.Row="2" Text="{Binding ElapsedText}"
+                                               FontSize="10" Foreground="#7E7E9A"
+                                               FontFamily="Consolas,Menlo,Monospace"
+                                               HorizontalAlignment="Right" />
+                                </Grid>
+
+                                <!-- Col 2: cue points -->
+                                <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="3" Margin="0,0,6,0">
+                                    <TextBlock Classes="caption" Text="START" />
+                                    <TextBlock Text="{Binding StartCueText}" FontSize="11" Foreground="#C8C8DC"
+                                               FontFamily="Consolas,Menlo,Monospace" />
+                                    <TextBlock Classes="caption" Text="END" Margin="0,6,0,0" />
+                                    <TextBlock Text="{Binding EndCueText}" FontSize="11" Foreground="{Binding AccentBrush}"
+                                               FontFamily="Consolas,Menlo,Monospace" />
+                                </StackPanel>
+
+                                <!-- Col 3: elapsed / remaining -->
+                                <StackPanel Grid.Column="3" VerticalAlignment="Center" Spacing="2" Margin="0,0,8,0">
+                                    <TextBlock Classes="caption" Text="{i18n:Tr aux.elapsed}" />
+                                    <TextBlock Classes="timebig" Text="{Binding ElapsedText}" />
+                                    <TextBlock Classes="caption" Text="{i18n:Tr main.remaining}" Margin="0,6,0,0" />
+                                    <TextBlock Classes="timebig" Text="{Binding RemainingText}" Foreground="#9AA0B0" />
+                                </StackPanel>
+
+                                <!-- Col 4: transport + toggles -->
+                                <Grid Grid.Column="4" RowDefinitions="Auto,Auto" VerticalAlignment="Center" Margin="0,0,10,0">
+                                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,4">
+                                        <Button Classes="transport play"  Content="▶ PLAY"  Command="{Binding PlayCommand}" />
+                                        <Button Classes="transport stop"  Content="■ STOP"  Command="{Binding StopCommand}" />
+                                        <Button Classes="transport eject" Content="⏏ EJECT" Command="{Binding EjectCommand}" Margin="0" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="1" Orientation="Horizontal">
+                                        <Button Classes="toggle" Classes.active="{Binding IsLooping}"
+                                                Background="{Binding AccentBrush}"
+                                                Content="↻ LOOP" Command="{Binding ToggleLoopCommand}" />
+                                        <Button Classes="toggle" Classes.active="{Binding IsPfl}"
+                                                Background="{Binding AccentBrush}"
+                                                Content="PFL" Command="{Binding TogglePflCommand}" />
+                                        <Button Classes="toggle" Classes.active="{Binding IsOn}"
+                                                Background="{Binding AccentBrush}"
+                                                Content="🎧 ON" Command="{Binding ToggleOnCommand}" Margin="0" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <!-- Col 5: volume + level -->
+                                <Grid Grid.Column="5" ColumnDefinitions="Auto,Auto" VerticalAlignment="Center">
+                                    <StackPanel Grid.Column="0" HorizontalAlignment="Center" Margin="0,0,10,0">
+                                        <TextBlock Classes="caption" Text="{i18n:Tr aux.volume}" HorizontalAlignment="Center" Margin="0,0,0,2" />
+                                        <Slider Orientation="Vertical" Minimum="0" Maximum="100"
+                                                Value="{Binding Volume}"
+                                                Height="64" HorizontalAlignment="Center" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                                        <TextBlock Classes="caption" Text="{i18n:Tr aux.level}" HorizontalAlignment="Center" Margin="0,0,0,2" />
+                                        <Border Width="10" Height="64" CornerRadius="2" Background="#0C0C16">
+                                            <Border VerticalAlignment="Bottom" CornerRadius="2"
+                                                    Height="{Binding LevelBarHeight}">
+                                                <Border.Background>
+                                                    <LinearGradientBrush StartPoint="0%,100%" EndPoint="0%,0%">
+                                                        <GradientStop Color="#46B450" Offset="0" />
+                                                        <GradientStop Color="#E6C000" Offset="0.75" />
+                                                        <GradientStop Color="#E03030" Offset="1" />
+                                                    </LinearGradientBrush>
+                                                </Border.Background>
+                                            </Border>
+                                        </Border>
+                                    </StackPanel>
+                                </Grid>
+
+                            </Grid>
+                        </Border>
+
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+    </Grid>
+
+</UserControl>

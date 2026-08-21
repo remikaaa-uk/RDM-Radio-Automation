@@ -1,0 +1,643 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RDM.UI.ViewModels"
+        xmlns:dto="using:RDM.Shared.DTOs"
+        xmlns:i18n="using:RDM.UI.Localization"
+        x:Class="RDM.UI.Views.TrackImportWindow"
+        Icon="avares://RDM/Assets/rdm.ico"
+        x:DataType="vm:TrackImportViewModel"
+        Title="Track Import"
+        Width="640" Height="560"
+        MinWidth="540" MinHeight="480"
+        WindowStartupLocation="CenterOwner"
+        CanResize="True"
+        Background="#1C1C2E">
+
+    <Window.Styles>
+        <Style Selector="ComboBox">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Padding"  Value="6,3" />
+        </Style>
+        <Style Selector="TextBox">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Padding"  Value="5,3" />
+        </Style>
+        <Style Selector="NumericUpDown">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Padding"  Value="4,2" />
+        </Style>
+        <Style Selector="CheckBox">
+            <Setter Property="FontSize" Value="11" />
+        </Style>
+        <Style Selector="Button">
+            <Setter Property="FontSize" Value="11" />
+        </Style>
+        <Style Selector="TextBlock.label">
+            <Setter Property="FontSize"            Value="11" />
+            <Setter Property="Foreground"          Value="LightGray" />
+            <Setter Property="VerticalAlignment"   Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="Margin"              Value="0,0,8,0" />
+        </Style>
+        <Style Selector="Button.playerBtn">
+            <Setter Property="Width"           Value="34" />
+            <Setter Property="Height"          Value="34" />
+            <Setter Property="Padding"         Value="0" />
+            <Setter Property="Background"      Value="#1A3A6A" />
+            <Setter Property="Foreground"      Value="White" />
+            <Setter Property="FontSize"        Value="13" />
+            <Setter Property="CornerRadius"    Value="17" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+    </Window.Styles>
+
+    <DockPanel LastChildFill="True">
+
+        <!-- ═══ Player panel ════════════════════════════════════════════════ -->
+        <Border DockPanel.Dock="Top"
+                Background="#0A0A20"
+                Height="58"
+                Padding="10,0"
+                BorderThickness="0,0,0,1"
+                BorderBrush="#2C2C44">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+
+                <!-- Transport buttons -->
+                <StackPanel Grid.Column="0"
+                            Orientation="Horizontal"
+                            Spacing="5"
+                            VerticalAlignment="Center">
+                    <Button Classes="playerBtn"
+                            Command="{Binding PlayCommand}"
+                            ToolTip.Tip="{i18n:Tr library.tip.play_pfl}">
+                        <TextBlock Text="▶" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                    </Button>
+                    <Button Classes="playerBtn"
+                            IsEnabled="False"
+                            ToolTip.Tip="{i18n:Tr ti.tip.next_cue}"
+                            Opacity="0.4">
+                        <TextBlock Text="⏭" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                    </Button>
+                    <Button Classes="playerBtn"
+                            Command="{Binding StopCommand}"
+                            ToolTip.Tip="Stop">
+                        <TextBlock Text="■" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                    </Button>
+                </StackPanel>
+
+                <!-- Artist / Title -->
+                <StackPanel Grid.Column="1"
+                            Orientation="Vertical"
+                            VerticalAlignment="Center"
+                            Margin="12,0">
+                    <TextBlock Text="{Binding Artist}"
+                               Foreground="White"
+                               FontWeight="Bold"
+                               FontSize="13" />
+                    <TextBlock Text="{Binding TitleText}"
+                               Foreground="#E8B84B"
+                               FontSize="12" />
+                </StackPanel>
+
+                <!-- Position / Duration / Select file button -->
+                <Grid Grid.Column="2"
+                      ColumnDefinitions="Auto,8,Auto"
+                      VerticalAlignment="Center">
+                    <StackPanel Grid.Column="0" Orientation="Vertical" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding CurrentPositionText}"
+                                   Foreground="White"
+                                   FontFamily="Consolas"
+                                   FontSize="13"
+                                   HorizontalAlignment="Right" />
+                        <TextBlock Text="{Binding TotalDurationText}"
+                                   Foreground="#4CAF50"
+                                   FontFamily="Consolas"
+                                   FontSize="13"
+                                   HorizontalAlignment="Right" />
+                    </StackPanel>
+                    <Button Grid.Column="2"
+                            Classes="playerBtn"
+                            ToolTip.Tip="{i18n:Tr ti.tip.select_file}"
+                            Click="OnPlayerPlusClicked">
+                        <TextBlock Text="+" FontSize="16" FontWeight="Bold"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Center" />
+                    </Button>
+                </Grid>
+
+            </Grid>
+        </Border>
+
+        <!-- ═══ Bottom button bar ════════════════════════════════════════════ -->
+        <Border DockPanel.Dock="Bottom"
+                Background="#0D0D1A"
+                Padding="6,5"
+                BorderThickness="0,1,0,0"
+                BorderBrush="#1C1C2E">
+            <Grid ColumnDefinitions="Auto,6,Auto,6,Auto,*,Auto,6,Auto">
+
+                <Button Grid.Column="0"
+                        Content="CUE Editor"
+                        Command="{Binding CueEditorCommand}"
+                        Padding="10,4" />
+
+                <Button Grid.Column="2"
+                        Content="ID3 Save"
+                        Command="{Binding Id3SaveCommand}"
+                        Padding="10,4" />
+
+                <Button Grid.Column="4"
+                        Content="ID3 Read"
+                        Command="{Binding Id3ReadCommand}"
+                        Padding="10,4" />
+
+                <TextBlock Grid.Column="5"
+                           Text="{Binding StatusText}"
+                           FontSize="10"
+                           Foreground="#8888AA"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center"
+                           TextWrapping="NoWrap"
+                           TextTrimming="CharacterEllipsis" />
+
+                <Button Grid.Column="6"
+                        Content="Import"
+                        Command="{Binding ImportCommand}"
+                        Padding="16,4"
+                        FontWeight="SemiBold" />
+
+                <Button Grid.Column="8"
+                        Content="{i18n:Tr common.close}"
+                        Padding="10,4"
+                        Click="OnCloseClicked" />
+
+            </Grid>
+        </Border>
+
+        <!-- ═══ Tab control ═════════════════════════════════════════════════ -->
+        <TabControl Background="Transparent">
+            <TabControl.Styles>
+                <Style Selector="TabItem">
+                    <Setter Property="FontSize" Value="12"/>
+                    <Setter Property="Padding" Value="10,5"/>
+                </Style>
+            </TabControl.Styles>
+
+            <!-- ── Settings ─────────────────────────────────────────────────── -->
+            <TabItem Header="{i18n:Tr te.tab.settings}">
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                              VerticalScrollBarVisibility="Auto">
+                    <Grid ColumnDefinitions="0.62*,0.38*" Margin="6,6,6,4">
+
+                        <!-- Left column — 8 rows -->
+                        <Grid Grid.Column="0"
+                              RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
+                              ColumnDefinitions="110,*"
+                              Margin="0,0,8,0">
+
+                            <!-- Row 0: Path/URL (no browse button — use + in player) -->
+                            <TextBlock Grid.Row="0" Grid.Column="0"
+                                       Classes="label"
+                                       Text="{i18n:Tr ti.path_url}" />
+                            <TextBox Grid.Row="0" Grid.Column="1"
+                                     Text="{Binding PathOrUrl}"
+                                     Watermark="{i18n:Tr ti.path_wm}"
+                                     Margin="0,3" />
+
+                            <!-- Row 1: Category -->
+                            <TextBlock Grid.Row="1" Grid.Column="0"
+                                       Classes="label"
+                                       Text="{i18n:Tr tm.col.category}" />
+                            <ComboBox Grid.Row="1" Grid.Column="1"
+                                      ItemsSource="{Binding Formats}"
+                                      SelectedItem="{Binding SelectedCategory}"
+                                      HorizontalAlignment="Stretch"
+                                      Margin="0,3">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="dto:AssetFormatDto">
+                                        <TextBlock Text="{Binding Name}" FontSize="11" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+
+                            <!-- Row 2: Subcategory -->
+                            <TextBlock Grid.Row="2" Grid.Column="0"
+                                       Classes="label"
+                                       Text="{i18n:Tr tm.col.subcategory}" />
+                            <ComboBox Grid.Row="2" Grid.Column="1"
+                                      ItemsSource="{Binding SubcategoryOptions}"
+                                      SelectedItem="{Binding SelectedSubcategory}"
+                                      HorizontalAlignment="Stretch"
+                                      Margin="0,3">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="dto:SubcategoryDto">
+                                        <TextBlock Text="{Binding Name}" FontSize="11" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+
+                            <!-- Row 3: Genre -->
+                            <TextBlock Grid.Row="3" Grid.Column="0"
+                                       Classes="label"
+                                       Text="{i18n:Tr tm.col.genre}" />
+                            <ComboBox Grid.Row="3" Grid.Column="1"
+                                      ItemsSource="{Binding GenreOptions}"
+                                      SelectedItem="{Binding SelectedGenre}"
+                                      HorizontalAlignment="Stretch"
+                                      Margin="0,3" />
+
+                            <!-- Row 4: Track Type -->
+                            <TextBlock Grid.Row="4" Grid.Column="0"
+                                       Classes="label"
+                                       Text="{i18n:Tr ti.track_type}" />
+                            <ComboBox Grid.Row="4" Grid.Column="1"
+                                      ItemsSource="{Binding TrackTypes}"
+                                      SelectedItem="{Binding SelectedTrackType}"
+                                      HorizontalAlignment="Stretch"
+                                      Margin="0,3" />
+
+                            <!-- Row 5: Play for -->
+                            <TextBlock Grid.Row="5" Grid.Column="0"
+                                       Classes="label"
+                                       Text="{i18n:Tr ti.play_for}" />
+                            <Grid Grid.Row="5" Grid.Column="1"
+                                  ColumnDefinitions="50,Auto,*"
+                                  Margin="0,3">
+                                <TextBox Grid.Column="0"
+                                         Text="{Binding PlayForTimes}"
+                                         VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1"
+                                           Text="{i18n:Tr ti.times_then}"
+                                           Foreground="LightGray"
+                                           FontSize="11"
+                                           VerticalAlignment="Center"
+                                           Margin="5,0" />
+                                <ComboBox Grid.Column="2"
+                                          ItemsSource="{Binding AfterPlayOptions}"
+                                          SelectedItem="{Binding SelectedAfterPlay}"
+                                          HorizontalAlignment="Stretch" />
+                            </Grid>
+
+                            <!-- Row 6: Start Date -->
+                            <TextBlock Grid.Row="6" Grid.Column="0"
+                                       Classes="label"
+                                       Text="{i18n:Tr te.date_start}" />
+                            <Grid Grid.Row="6" Grid.Column="1"
+                                  ColumnDefinitions="Auto,*,26"
+                                  Margin="0,3">
+                                <CheckBox Grid.Column="0"
+                                          IsChecked="{Binding StartDateEnabled}"
+                                          VerticalAlignment="Center"
+                                          Margin="0,0,4,0" />
+                                <TextBox Grid.Column="1"
+                                         Text="{Binding StartDateText}"
+                                         VerticalAlignment="Center" />
+                                <Button Grid.Column="2"
+                                        Width="24"
+                                        Margin="3,0,0,0"
+                                        Padding="2"
+                                        Content="▼"
+                                        VerticalAlignment="Center"
+                                        Click="OnStartDatePickerClicked" />
+                            </Grid>
+
+                            <!-- Row 7: End Date -->
+                            <TextBlock Grid.Row="7" Grid.Column="0"
+                                       Classes="label"
+                                       Text="{i18n:Tr te.date_end}" />
+                            <Grid Grid.Row="7" Grid.Column="1"
+                                  ColumnDefinitions="Auto,*,26"
+                                  Margin="0,3">
+                                <CheckBox Grid.Column="0"
+                                          IsChecked="{Binding EndDateEnabled}"
+                                          VerticalAlignment="Center"
+                                          Margin="0,0,4,0" />
+                                <TextBox Grid.Column="1"
+                                         Text="{Binding EndDateText}"
+                                         VerticalAlignment="Center" />
+                                <Button Grid.Column="2"
+                                        Width="24"
+                                        Margin="3,0,0,0"
+                                        Padding="2"
+                                        Content="▼"
+                                        VerticalAlignment="Center"
+                                        Click="OnEndDatePickerClicked" />
+                            </Grid>
+
+                        </Grid>
+
+                        <!-- Right column — 8 rows -->
+                        <Grid Grid.Column="1"
+                              RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
+                              Margin="6,0,0,0">
+
+                            <!-- Row 0: High Precision CUE Points -->
+                            <Grid Grid.Row="0"
+                                  ColumnDefinitions="*,Auto"
+                                  Margin="0,3">
+                                <TextBlock Grid.Column="0"
+                                           Text="High Precision CUE"
+                                           Classes="label"
+                                           HorizontalAlignment="Right" />
+                                <CheckBox Grid.Column="1"
+                                          IsChecked="{Binding HighPrecisionCuePoints}"
+                                          VerticalAlignment="Center" />
+                            </Grid>
+
+                            <!-- Row 1: Overlay File -->
+                            <Grid Grid.Row="1"
+                                  ColumnDefinitions="*,Auto"
+                                  Margin="0,3">
+                                <TextBlock Grid.Column="0"
+                                           Text="Overlay File"
+                                           Classes="label"
+                                           HorizontalAlignment="Right" />
+                                <CheckBox Grid.Column="1"
+                                          IsChecked="{Binding OverlayFile}"
+                                          VerticalAlignment="Center" />
+                            </Grid>
+
+                            <!-- Row 2: Use Original Stream Title -->
+                            <Grid Grid.Row="2"
+                                  ColumnDefinitions="*,Auto"
+                                  Margin="0,3">
+                                <TextBlock Grid.Column="0"
+                                           Text="{i18n:Tr ti.orig_stream_title}"
+                                           Classes="label"
+                                           HorizontalAlignment="Right" />
+                                <CheckBox Grid.Column="1"
+                                          IsChecked="{Binding UseOriginalStreamTitle}"
+                                          VerticalAlignment="Center" />
+                            </Grid>
+
+                            <!-- Row 3: Track Status (dropdown) -->
+                            <Grid Grid.Row="3"
+                                  ColumnDefinitions="*,Auto"
+                                  Margin="0,3">
+                                <TextBlock Grid.Column="0"
+                                           Text="{i18n:Tr ti.track_status}"
+                                           Classes="label"
+                                           HorizontalAlignment="Right" />
+                                <ComboBox Grid.Column="1"
+                                          ItemsSource="{Binding StatusOptions}"
+                                          SelectedItem="{Binding SelectedStatus}"
+                                          MinWidth="130"
+                                          VerticalAlignment="Center" />
+                            </Grid>
+
+                            <!-- Row 4: ID (read-only) -->
+                            <Grid Grid.Row="4"
+                                  ColumnDefinitions="*,Auto"
+                                  Margin="0,3">
+                                <TextBlock Grid.Column="0"
+                                           Text="ID"
+                                           Classes="label"
+                                           HorizontalAlignment="Right" />
+                                <TextBox Grid.Column="1"
+                                         Text="{Binding TrackId}"
+                                         IsReadOnly="True"
+                                         Width="80"
+                                         FontSize="9"
+                                         VerticalAlignment="Center"
+                                         Background="#111122"
+                                         Foreground="#8888AA" />
+                            </Grid>
+
+                            <!-- Row 5: "Read from" label -->
+                            <TextBlock Grid.Row="5"
+                                       Text="{i18n:Tr ti.read_from}"
+                                       FontSize="10"
+                                       FontWeight="Bold"
+                                       Foreground="#6666AA"
+                                       HorizontalAlignment="Right"
+                                       Margin="0,6,0,2" />
+
+                            <!-- Row 6: Read .RDM + Read ID3 -->
+                            <Grid Grid.Row="6"
+                                  ColumnDefinitions="*,Auto,Auto,Auto"
+                                  Margin="0,3">
+                                <TextBlock Grid.Column="0"
+                                           Text="Read .RDM"
+                                           Classes="label"
+                                           HorizontalAlignment="Right" />
+                                <CheckBox Grid.Column="1"
+                                          IsChecked="{Binding ReadRdm}"
+                                          VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="2"
+                                           Text="Read ID3"
+                                           Classes="label"
+                                           Margin="10,0,8,0" />
+                                <CheckBox Grid.Column="3"
+                                          IsChecked="{Binding ReadId3}"
+                                          VerticalAlignment="Center" />
+                            </Grid>
+
+                            <!-- Row 7: Read .WFRM -->
+                            <Grid Grid.Row="7"
+                                  ColumnDefinitions="*,Auto,Auto,Auto"
+                                  Margin="0,3">
+                                <TextBlock Grid.Column="0"
+                                           Text="Read .WFRM"
+                                           Classes="label"
+                                           HorizontalAlignment="Right"
+                                           Margin="0,0,8,0" />
+                                <CheckBox Grid.Column="1"
+                                          IsChecked="{Binding ReadWfrm}"
+                                          VerticalAlignment="Center" />
+                            </Grid>
+
+                            <!-- Row 8: Variable Duration (live cue re-analysis on every load, e.g. news bulletins) -->
+                            <Grid Grid.Row="8"
+                                  ColumnDefinitions="*,Auto"
+                                  Margin="0,3">
+                                <TextBlock Grid.Column="0"
+                                           Text="{i18n:Tr ti.variable_duration}"
+                                           Classes="label"
+                                           HorizontalAlignment="Right" />
+                                <CheckBox Grid.Column="1"
+                                          IsChecked="{Binding IsVariableDuration}"
+                                          VerticalAlignment="Center" />
+                            </Grid>
+
+                        </Grid>
+
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ── Details ──────────────────────────────────────────────────── -->
+            <TabItem Header="{i18n:Tr te.tab.details}">
+                <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto"
+                      ColumnDefinitions="80,*"
+                      Margin="12,10,12,6">
+
+                    <!-- Title -->
+                    <TextBlock Grid.Row="0" Grid.Column="0"
+                               Classes="label" Text="{i18n:Tr library.col.title}"
+                               HorizontalAlignment="Right" Margin="0,0,8,0" />
+                    <TextBox Grid.Row="0" Grid.Column="1"
+                             Text="{Binding TitleText}"
+                             Margin="0,3" />
+
+                    <!-- Artist -->
+                    <TextBlock Grid.Row="1" Grid.Column="0"
+                               Classes="label" Text="{i18n:Tr library.col.artist}"
+                               HorizontalAlignment="Right" Margin="0,0,8,0" />
+                    <TextBox Grid.Row="1" Grid.Column="1"
+                             Text="{Binding Artist}"
+                             Margin="0,3" />
+
+                    <!-- Album -->
+                    <TextBlock Grid.Row="2" Grid.Column="0"
+                               Classes="label" Text="Album"
+                               HorizontalAlignment="Right" Margin="0,0,8,0" />
+                    <TextBox Grid.Row="2" Grid.Column="1"
+                             Text="{Binding Album}"
+                             Margin="0,3" />
+
+                    <!-- Year -->
+                    <TextBlock Grid.Row="3" Grid.Column="0"
+                               Classes="label" Text="{i18n:Tr tm.col.year}"
+                               HorizontalAlignment="Right" Margin="0,0,8,0" />
+                    <NumericUpDown Grid.Row="3" Grid.Column="1"
+                                   Value="{Binding Year}"
+                                   Minimum="1900" Maximum="2099"
+                                   FormatString="F0"
+                                   ShowButtonSpinner="False"
+                                   Width="90"
+                                   HorizontalAlignment="Left"
+                                   Margin="0,3" />
+
+                    <!-- BPM -->
+                    <TextBlock Grid.Row="4" Grid.Column="0"
+                               Classes="label" Text="BPM"
+                               HorizontalAlignment="Right" Margin="0,0,8,0" />
+                    <NumericUpDown Grid.Row="4" Grid.Column="1"
+                                   Value="{Binding Bpm}"
+                                   Minimum="0" Maximum="300"
+                                   Increment="1"
+                                   FormatString="F0"
+                                   ShowButtonSpinner="False"
+                                   Width="90"
+                                   HorizontalAlignment="Left"
+                                   Margin="0,3" />
+
+                    <!-- Duration (read-only) -->
+                    <TextBlock Grid.Row="5" Grid.Column="0"
+                               Classes="label" Text="{i18n:Tr library.col.duration}"
+                               HorizontalAlignment="Right" Margin="0,0,8,0" />
+                    <TextBlock Grid.Row="5" Grid.Column="1"
+                               Text="{Binding TotalDurationText}"
+                               Foreground="#4CAF50"
+                               FontFamily="Consolas"
+                               FontSize="12"
+                               VerticalAlignment="Center"
+                               Margin="0,3" />
+
+                    <!-- Asset ID (read-only) -->
+                    <TextBlock Grid.Row="6" Grid.Column="0"
+                               Classes="label" Text="ID"
+                               HorizontalAlignment="Right" Margin="0,0,8,0" />
+                    <TextBlock Grid.Row="6" Grid.Column="1"
+                               Text="{Binding TrackId}"
+                               Foreground="#8888AA"
+                               FontSize="9"
+                               FontFamily="Consolas"
+                               VerticalAlignment="Center"
+                               Margin="0,3" />
+
+                </Grid>
+            </TabItem>
+
+            <!-- ── Sweepers ──────────────────────────────────────────────────── -->
+            <TabItem Header="{i18n:Tr te.tab.sweepers}">
+                <TextBlock Margin="16,12"
+                           Foreground="#8888AA"
+                           FontSize="11"
+                           TextWrapping="Wrap"
+                           Text="{i18n:Tr ti.sweepers_note}" />
+            </TabItem>
+
+            <!-- ── Comments ──────────────────────────────────────────────────── -->
+            <TabItem Header="{i18n:Tr te.tab.comments}">
+                <TextBox Text="{Binding Comments}"
+                         Margin="8"
+                         TextWrapping="Wrap"
+                         AcceptsReturn="True"
+                         Background="#111122"
+                         BorderBrush="#2C2C44"
+                         Foreground="LightGray"
+                         FontSize="11"
+                         Watermark="{i18n:Tr ti.comments_wm}"
+                         VerticalAlignment="Stretch" />
+            </TabItem>
+
+            <!-- ── Image ────────────────────────────────────────────────────── -->
+            <TabItem Header="{i18n:Tr te.tab.image}">
+                <Grid RowDefinitions="*,Auto" Margin="8">
+                    <Border Grid.Row="0"
+                            Background="#111122"
+                            BorderBrush="#2C2C44"
+                            BorderThickness="1"
+                            CornerRadius="4">
+                        <Image Source="{Binding CoverArt}"
+                               Stretch="Uniform"
+                               Margin="4" />
+                    </Border>
+                    <StackPanel Grid.Row="1"
+                                Orientation="Horizontal"
+                                Spacing="6"
+                                Margin="0,6,0,0">
+                        <Button Content="{i18n:Tr ti.select_image}"
+                                Click="OnSelectImageClicked"
+                                Padding="10,4" />
+                        <Button Content="{i18n:Tr ti.clear}"
+                                Command="{Binding ClearImageCommand}"
+                                Padding="10,4" />
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <!-- ── Others ───────────────────────────────────────────────────── -->
+            <TabItem Header="{i18n:Tr ti.tab.others}">
+                <StackPanel Margin="16,12" Spacing="10">
+                    <Grid ColumnDefinitions="140,*">
+                        <TextBlock Grid.Column="0"
+                                   Text="High Precision CUE Points"
+                                   Classes="label"
+                                   HorizontalAlignment="Left" />
+                        <CheckBox Grid.Column="1"
+                                  IsChecked="{Binding HighPrecisionCuePoints}" />
+                    </Grid>
+                    <Grid ColumnDefinitions="140,*">
+                        <TextBlock Grid.Column="0"
+                                   Text="Overlay File"
+                                   Classes="label"
+                                   HorizontalAlignment="Left" />
+                        <CheckBox Grid.Column="1"
+                                  IsChecked="{Binding OverlayFile}" />
+                    </Grid>
+                    <Grid ColumnDefinitions="140,*">
+                        <TextBlock Grid.Column="0"
+                                   Text="{i18n:Tr ti.use_orig_stream}"
+                                   Classes="label"
+                                   HorizontalAlignment="Left" />
+                        <CheckBox Grid.Column="1"
+                                  IsChecked="{Binding UseOriginalStreamTitle}" />
+                    </Grid>
+                    <Grid ColumnDefinitions="140,*">
+                        <TextBlock Grid.Column="0"
+                                   Text="{i18n:Tr ti.variable_duration}"
+                                   Classes="label"
+                                   HorizontalAlignment="Left" />
+                        <CheckBox Grid.Column="1"
+                                  IsChecked="{Binding IsVariableDuration}" />
+                    </Grid>
+                </StackPanel>
+            </TabItem>
+
+        </TabControl>
+
+    </DockPanel>
+
+</Window>

@@ -1,0 +1,302 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RDM.UI.ViewModels"
+        xmlns:i18n="using:RDM.UI.Localization"
+        x:Class="RDM.UI.Views.MicDspChainWindow"
+        Icon="avares://RDM/Assets/rdm.ico"
+        x:DataType="vm:MicDspChainViewModel"
+        Title="{i18n:Tr md.title}"
+        Width="560" Height="480"
+        MinWidth="480" MinHeight="380"
+        WindowStartupLocation="CenterOwner"
+        CanResize="True"
+        Background="#0B0B18">
+
+    <Grid RowDefinitions="*,Auto">
+
+        <!-- ── Main area ──────────────────────────────────────────────────────── -->
+        <Grid Grid.Row="0" ColumnDefinitions="80,*" Margin="12,12,12,6">
+
+            <!-- ── VU meter column ────────────────────────────────────────────── -->
+            <StackPanel Grid.Column="0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        Spacing="6">
+
+                <TextBlock Text="MIC LEVEL"
+                           FontSize="9" FontWeight="Bold"
+                           Foreground="Gray"
+                           HorizontalAlignment="Center"
+                           LetterSpacing="1" />
+
+                <!-- Mic active status badge -->
+                <Border CornerRadius="3" Padding="4,2"
+                        HorizontalAlignment="Center">
+                    <Border.Background>
+                        <SolidColorBrush Color="#0F0F20" />
+                    </Border.Background>
+                    <TextBlock Text="{Binding MicStatusText}"
+                               FontSize="8" FontWeight="Bold"
+                               Foreground="{Binding MicStatusColor}"
+                               HorizontalAlignment="Center"
+                               LetterSpacing="1" />
+                </Border>
+
+                <!-- VU bar container -->
+                <Grid Width="44" Height="180">
+                    <!-- Background track -->
+                    <Rectangle Fill="#111120" RadiusX="4" RadiusY="4" />
+                    <!-- dB grid lines (decorative, at -60,-48,-36,-24,-12,-6,-3,0 dBFS) -->
+                    <Canvas Width="44" Height="180">
+                        <!-- -3 dBFS mark (97% from bottom = 174.6) -->
+                        <Rectangle Canvas.Top="6"   Height="1" Width="44" Fill="#FF333344" Opacity="0.5" />
+                        <!-- -12 dBFS mark (80% = 144) -->
+                        <Rectangle Canvas.Top="36"  Height="1" Width="44" Fill="#33334488" Opacity="0.5" />
+                        <!-- -24 dBFS mark (60% = 108) -->
+                        <Rectangle Canvas.Top="72"  Height="1" Width="44" Fill="#33334488" Opacity="0.3" />
+                        <!-- -36 dBFS mark (40% = 72) -->
+                        <Rectangle Canvas.Top="108" Height="1" Width="44" Fill="#33334488" Opacity="0.3" />
+                    </Canvas>
+                    <!-- Level bar (grows from bottom) -->
+                    <Rectangle Fill="{Binding VuBrush}"
+                               Height="{Binding VuHeight}"
+                               VerticalAlignment="Bottom"
+                               RadiusX="3" RadiusY="3" />
+                </Grid>
+
+                <!-- dB scale labels -->
+                <Grid Width="44">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="0 dB"  FontSize="8" Foreground="#FF4444" HorizontalAlignment="Center" />
+                    <TextBlock Grid.Row="1" Text="-12"   FontSize="8" Foreground="Gray"    HorizontalAlignment="Center" Margin="0,2" />
+                    <TextBlock Grid.Row="2" Text="-60"   FontSize="8" Foreground="#333355" HorizontalAlignment="Center" />
+                </Grid>
+
+                <!-- Numeric level -->
+                <Border Background="#0A0A18" CornerRadius="3" Padding="4,2">
+                    <TextBlock Text="{Binding LevelText}"
+                               FontSize="11" FontFamily="Consolas,monospace"
+                               Foreground="{Binding VuBrush}"
+                               HorizontalAlignment="Center" />
+                </Border>
+
+            </StackPanel>
+
+            <!-- ── FX / VST panels ────────────────────────────────────────────── -->
+            <ScrollViewer Grid.Column="1"
+                          Margin="10,0,0,0"
+                          VerticalScrollBarVisibility="Auto">
+                <!-- 13 px gutter on the right: the scrollbar is an overlay drawn on top of the
+                     content (ScrollBarSize=11 in App.axaml), so without it the values and the
+                     Add buttons sit underneath it. Same number as in PlaylistView. -->
+                <StackPanel Spacing="12" Margin="0,0,13,0">
+
+                    <!-- Mic inactive warning -->
+                    <Border Background="#2A1010" CornerRadius="4" Padding="10,7"
+                            IsVisible="{Binding !IsMicActive}">
+                        <TextBlock Text="{i18n:Tr md.mic_off_warning}"
+                                   FontSize="11" Foreground="#FF8C8C"
+                                   TextWrapping="Wrap" />
+                    </Border>
+
+                    <!-- ── BFX Effects ──────────────────────────────────────────── -->
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="{i18n:Tr md.bfx_title}"
+                                   FontSize="11" FontWeight="SemiBold"
+                                   Foreground="#4AB5FF" />
+
+                        <!-- FX list -->
+                        <ItemsControl ItemsSource="{Binding FxSlots}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:MicFxRowViewModel">
+                                    <Border Background="#0F0F20" CornerRadius="4"
+                                            Padding="8,5" Margin="0,1">
+                                        <StackPanel Spacing="4">
+                                            <Grid ColumnDefinitions="*,Auto,Auto">
+                                                <TextBlock Grid.Column="0"
+                                                           Text="{Binding Label}"
+                                                           FontSize="12"
+                                                           VerticalAlignment="Center" />
+                                                <Button Grid.Column="1"
+                                                        Content="⚙"
+                                                        Command="{Binding ToggleExpandedCommand}"
+                                                        Padding="6,3" Margin="4,0"
+                                                        Background="Transparent"
+                                                        ToolTip.Tip="{i18n:Tr md.tip.edit_fx}" />
+                                                <Button Grid.Column="2"
+                                                        Content="🗑"
+                                                        Command="{ReflectionBinding $parent[Window].DataContext.RemoveFxCommand}"
+                                                        CommandParameter="{Binding}"
+                                                        Padding="6,3"
+                                                        Foreground="#FF6B6B"
+                                                        Background="Transparent"
+                                                        ToolTip.Tip="{i18n:Tr md.tip.remove_fx}" />
+                                            </Grid>
+
+                                            <!-- Parameter editor — collapsed until ⚙ is pressed -->
+                                            <ItemsControl ItemsSource="{Binding Parameters}"
+                                                          IsVisible="{Binding IsExpanded}"
+                                                          Margin="0,2,0,0">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate x:DataType="vm:MicFxParamViewModel">
+                                                        <Grid ColumnDefinitions="110,*,64" Margin="0,1">
+                                                            <TextBlock Grid.Column="0"
+                                                                       Text="{Binding Label}"
+                                                                       FontSize="11" Foreground="Gray"
+                                                                       VerticalAlignment="Center" />
+                                                            <Slider Grid.Column="1"
+                                                                    Minimum="{Binding Min}"
+                                                                    Maximum="{Binding Max}"
+                                                                    Value="{Binding Value}"
+                                                                    Margin="4,0" />
+                                                            <TextBlock Grid.Column="2"
+                                                                       Text="{Binding Display}"
+                                                                       FontSize="11"
+                                                                       HorizontalAlignment="Right"
+                                                                       VerticalAlignment="Center" />
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!-- Empty state -->
+                        <TextBlock Text="{i18n:Tr md.no_fx}"
+                                   IsVisible="{Binding !FxSlots.Count}"
+                                   FontSize="11" Foreground="#444466"
+                                   HorizontalAlignment="Center" Margin="0,2" />
+
+                        <!-- Add FX row -->
+                        <Grid ColumnDefinitions="*,Auto">
+                            <ComboBox Grid.Column="0"
+                                      ItemsSource="{Binding FxOptions, Mode=OneTime}"
+                                      SelectedItem="{Binding SelectedFxOption}"
+                                      HorizontalAlignment="Stretch"
+                                      Margin="0,0,6,0">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:FxTypeOption">
+                                        <TextBlock Text="{Binding Label}" FontSize="12" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                            <Button Grid.Column="1"
+                                    Content="{i18n:Tr md.add}"
+                                    Command="{Binding AddFxCommand}"
+                                    Padding="10,4"
+                                    ToolTip.Tip="{i18n:Tr md.tip.add_fx}" />
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- Separator -->
+                    <Rectangle Height="1" Fill="#1C1C2E" />
+
+                    <!-- ── VST Plugins ──────────────────────────────────────────── -->
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="{i18n:Tr md.vst_title}"
+                                   FontSize="11" FontWeight="SemiBold"
+                                   Foreground="#4AB5FF" />
+
+                        <!-- VST list -->
+                        <ItemsControl ItemsSource="{Binding VstSlots}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:MicVstRowViewModel">
+                                    <Border Background="#0F0F20" CornerRadius="4"
+                                            Padding="8,5" Margin="0,1">
+                                        <Grid ColumnDefinitions="*,Auto,Auto">
+                                            <StackPanel Grid.Column="0"
+                                                        VerticalAlignment="Center"
+                                                        Spacing="1">
+                                                <TextBlock Text="{Binding Label}"
+                                                           FontSize="12" />
+                                                <TextBlock Text="{Binding DllPath}"
+                                                           FontSize="9"
+                                                           Foreground="Gray"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           ToolTip.Tip="{Binding DllPath}" />
+                                            </StackPanel>
+                                            <Button Grid.Column="1"
+                                                    Content="🎛"
+                                                    Command="{ReflectionBinding $parent[Window].DataContext.OpenVstEditorCommand}"
+                                                    CommandParameter="{Binding}"
+                                                    Padding="6,3" Margin="4,0"
+                                                    Background="Transparent"
+                                                    ToolTip.Tip="{i18n:Tr md.tip.open_vst}" />
+                                            <Button Grid.Column="2"
+                                                    Content="🗑"
+                                                    Command="{ReflectionBinding $parent[Window].DataContext.RemoveVstCommand}"
+                                                    CommandParameter="{Binding}"
+                                                    Padding="6,3"
+                                                    Foreground="#FF6B6B"
+                                                    Background="Transparent"
+                                                    ToolTip.Tip="{i18n:Tr md.tip.remove_vst}" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!-- Empty state -->
+                        <TextBlock Text="{i18n:Tr md.no_vst}"
+                                   IsVisible="{Binding !VstSlots.Count}"
+                                   FontSize="11" Foreground="#444466"
+                                   HorizontalAlignment="Center" Margin="0,2" />
+
+                        <!-- Add VST row -->
+                        <Grid ColumnDefinitions="*,Auto,Auto">
+                            <TextBox Grid.Column="0"
+                                     x:Name="VstPathBox"
+                                     Text="{Binding VstPathInput}"
+                                     Watermark="{i18n:Tr md.vst_path_wm}"
+                                     Padding="6,4" FontSize="11"
+                                     Margin="0,0,4,0" />
+                            <Button Grid.Column="1"
+                                    x:Name="BrowseVstButton"
+                                    Content="📂"
+                                    Padding="8,4" Margin="0,0,4,0"
+                                    ToolTip.Tip="{i18n:Tr md.tip.browse_vst}" />
+                            <Button Grid.Column="2"
+                                    Content="{i18n:Tr md.add}"
+                                    Command="{Binding AddVstCommand}"
+                                    Padding="10,4"
+                                    ToolTip.Tip="{i18n:Tr md.tip.add_vst}" />
+                        </Grid>
+
+                    </StackPanel>
+
+                </StackPanel>
+            </ScrollViewer>
+
+        </Grid>
+
+        <!-- ── Status bar ─────────────────────────────────────────────────────── -->
+        <Border Grid.Row="1"
+                Background="#0D0D1A"
+                BorderThickness="0,1,0,0" BorderBrush="#1C1C2E"
+                Padding="12,6">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0"
+                           Text="{Binding ErrorMessage}"
+                           IsVisible="{Binding ErrorMessage, Converter={x:Static ObjectConverters.IsNotNull}}"
+                           FontSize="11" Foreground="#FF6B6B"
+                           VerticalAlignment="Center"
+                           TextTrimming="CharacterEllipsis"
+                           ToolTip.Tip="{Binding ErrorMessage}" />
+                <Button Grid.Column="1"
+                        Content="{i18n:Tr history.refresh}"
+                        Command="{Binding LoadCommand}"
+                        Padding="10,4"
+                        FontSize="11" />
+            </Grid>
+        </Border>
+
+    </Grid>
+
+</Window>

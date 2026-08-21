@@ -1,0 +1,44 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RDM.UI.ViewModels"
+        xmlns:i18n="using:RDM.UI.Localization"
+        x:Class="RDM.UI.Views.LearnModeDialog"
+        Icon="avares://RDM/Assets/rdm.ico"
+        x:DataType="vm:HardwareManagerViewModel"
+        Title="{i18n:Tr hw.learn_mode.title}"
+        Width="400" Height="240"
+        MinWidth="360" MinHeight="200"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        Background="#0F0F1A">
+
+    <Grid RowDefinitions="*,Auto" Margin="20">
+        <StackPanel Grid.Row="0" Spacing="14" VerticalAlignment="Center">
+            <TextBlock Text="{i18n:Tr hw.learn_mode.header}"
+                       FontSize="16" FontWeight="Bold" Foreground="White"
+                       HorizontalAlignment="Center"/>
+            <TextBlock Text="{Binding LearnStatus}"
+                       FontSize="13" Foreground="#AAAACC"
+                       HorizontalAlignment="Center"
+                       TextWrapping="Wrap"/>
+            <StackPanel Spacing="4" IsVisible="{Binding LearnedSignature, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                <TextBlock FontSize="12" Foreground="#8888AA" HorizontalAlignment="Center">
+                    <Run Text="{i18n:Tr hw.learn_mode.type}"/>
+                    <Run Text="{Binding LearnedDeviceType}" Foreground="#CCCCDD"/>
+                </TextBlock>
+                <TextBlock FontSize="12" Foreground="#8888AA" HorizontalAlignment="Center">
+                    <Run Text="{i18n:Tr hw.learn_mode.signature}"/>
+                    <Run Text="{Binding LearnedSignature}" Foreground="#AADDAA"/>
+                </TextBlock>
+            </StackPanel>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button Content="{i18n:Tr common.cancel}" Click="OnCancel"
+                    Background="#1C1C2E" Foreground="#CCCCDD" Padding="12,5"/>
+            <Button Content="{i18n:Tr common.apply}" Click="OnApply"
+                    Background="#1E3A5F" Foreground="White" Padding="12,5"
+                    IsEnabled="{Binding LearnedSignature, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+        </StackPanel>
+    </Grid>
+</Window>

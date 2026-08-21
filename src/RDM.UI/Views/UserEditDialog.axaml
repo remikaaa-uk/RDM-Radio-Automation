@@ -1,0 +1,68 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RDM.UI.ViewModels"
+        xmlns:i18n="using:RDM.UI.Localization"
+        x:Class="RDM.UI.Views.UserEditDialog"
+        x:DataType="vm:NewUserDialogViewModel"
+        Icon="avares://RDM/Assets/rdm.ico"
+        Title="{i18n:Tr users.add.title}"
+        Width="360" Height="360"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+
+    <DockPanel Margin="24">
+
+        <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="0 0 0 16">
+            <TextBlock Text="{i18n:Tr users.add.title}"
+                       FontSize="16" FontWeight="Bold"
+                       HorizontalAlignment="Center" />
+        </StackPanel>
+
+        <StackPanel DockPanel.Dock="Bottom" Spacing="8" Margin="0 16 0 0">
+            <Button Name="SaveButton" Content="{i18n:Tr common.add}"
+                    Click="OnSaveClicked"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center"
+                    IsDefault="True" />
+            <Button Content="{i18n:Tr common.cancel}"
+                    Click="OnCancelClicked"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center" />
+        </StackPanel>
+
+        <StackPanel Spacing="10">
+
+            <StackPanel Spacing="4">
+                <TextBlock Text="{i18n:Tr users.field.username}" FontSize="11" Foreground="Gray"/>
+                <TextBox Text="{Binding Username}" />
+            </StackPanel>
+
+            <StackPanel Spacing="4">
+                <TextBlock Text="{i18n:Tr users.field.role}" FontSize="11" Foreground="Gray"/>
+                <ComboBox ItemsSource="{Binding Roles}" SelectedItem="{Binding SelectedRole}" HorizontalAlignment="Stretch"/>
+            </StackPanel>
+
+            <StackPanel Spacing="4">
+                <TextBlock Text="{i18n:Tr users.field.password}" FontSize="11" Foreground="Gray"/>
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBox Grid.Column="0" Text="{Binding Password}" />
+                    <Button Grid.Column="1" Content="{i18n:Tr users.action.generate}"
+                            Command="{Binding GenerateCommand}" Margin="6,0,0,0" />
+                </Grid>
+            </StackPanel>
+
+            <Border Background="#331A1A"
+                    CornerRadius="4"
+                    Padding="10 8"
+                    IsVisible="{Binding HasError}">
+                <TextBlock Text="{Binding ErrorMessage}"
+                           Foreground="#FF6B6B"
+                           TextWrapping="Wrap"
+                           FontSize="12" />
+            </Border>
+
+        </StackPanel>
+
+    </DockPanel>
+
+</Window>

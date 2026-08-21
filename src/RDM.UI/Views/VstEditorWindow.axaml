@@ -1,0 +1,17 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="RDM.UI.Views.VstEditorWindow"
+        Icon="avares://RDM/Assets/rdm.ico"
+        Width="640" Height="400"
+        CanResize="True"
+        WindowStartupLocation="CenterOwner"
+        Background="#0B0B18">
+
+    <!-- Intentionally almost empty: the plugin creates its GUI as a native child window at (0,0)
+         of this window and covers the whole client area. Anything placed here would be hidden
+         the moment the editor is embedded. The text below is only visible while embedding. -->
+    <TextBlock Text="…"
+               FontSize="11" Foreground="#444466"
+               HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+</Window>

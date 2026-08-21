@@ -1,0 +1,40 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i18n="using:RDM.UI.Localization"
+        x:Class="RDM.UI.Views.SimpleInputDialog"
+        Icon="avares://RDM/Assets/rdm.ico"
+        Width="360" Height="160"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        Background="#0F0F1A"
+        SizeToContent="Height">
+
+    <Grid RowDefinitions="Auto,Auto,Auto" Margin="16">
+
+        <TextBlock x:Name="PromptText"
+                   Grid.Row="0"
+                   FontSize="12" Foreground="#AAAACC"
+                   Margin="0,0,0,8" />
+
+        <TextBox x:Name="InputBox"
+                 Grid.Row="1"
+                 FontSize="13"
+                 Background="#131320" Foreground="White"
+                 BorderBrush="#2A2A4A"
+                 Margin="0,0,0,14"
+                 KeyDown="OnKeyDown" />
+
+        <Grid Grid.Row="2" ColumnDefinitions="*,Auto,Auto">
+            <Button Grid.Column="1" x:Name="OkBtn"
+                    Content="{i18n:Tr common.ok}"
+                    Width="80" Height="26" FontSize="12"
+                    IsDefault="True"
+                    Click="OnOk" />
+            <Button Grid.Column="2" Content="{i18n:Tr common.cancel}"
+                    Width="80" Height="26" FontSize="12"
+                    Margin="8,0,0,0" IsCancel="True"
+                    Click="OnCancel" />
+        </Grid>
+
+    </Grid>
+</Window>

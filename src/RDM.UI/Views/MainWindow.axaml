@@ -1,0 +1,349 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RDM.UI.ViewModels"
+        xmlns:views="using:RDM.UI.Views"
+        xmlns:ctrl="using:RDM.UI.Controls"
+        xmlns:i18n="using:RDM.UI.Localization"
+        x:Class="RDM.UI.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="RDM Radio Digital Manager"
+        Icon="avares://RDM/Assets/rdm.ico"
+        Width="1280" Height="720"
+        WindowStartupLocation="CenterScreen"
+        MinWidth="900" MinHeight="500">
+
+    <DockPanel>
+
+        <!-- ═══════════════════════════════════════════════════════════════════
+             TOP BAR — empty toolbar above player
+             ═══════════════════════════════════════════════════════════════════ -->
+        <Border DockPanel.Dock="Top"
+                Background="#0A0A15"
+                Height="34"
+                BorderThickness="0,0,0,1"
+                BorderBrush="#202030">
+            <Grid>
+                <TextBlock Text="{i18n:Tr main.topbar.subtitle}"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Left"
+                           Margin="8,0,0,0"
+                           FontSize="12"
+                           Foreground="#8F8FA3" />
+                <!-- Deliberately louder than the subtitle opposite it: the date is information the
+                     operator reads, the subtitle is branding they already know. Brightened as well
+                     as bolded — at #8F8FA3 the weight alone barely registered against this bar. -->
+                <TextBlock Text="{Binding PlayerViewModel.CurrentFullDateText}"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Right"
+                           Margin="0,0,8,0"
+                           FontSize="13"
+                           FontWeight="Bold"
+                           Foreground="#C8C8DC" />
+            </Grid>
+        </Border>
+
+        <!-- ═══════════════════════════════════════════════════════════════════
+             INTEGRATED SOHO-STYLE PLAYER BAR — top info & controls row
+             ═══════════════════════════════════════════════════════════════════ -->
+        <Border DockPanel.Dock="Top"
+                Background="#11111C"
+                Height="100"
+                BorderThickness="0,0,0,1"
+                BorderBrush="#202030"
+                Padding="8,6">
+
+            <Grid ColumnDefinitions="90,*,Auto,Auto,Auto,140" VerticalAlignment="Center">
+
+                <!-- Column 0: Cover / Logo -->
+                <Border Grid.Column="0" Width="80" Height="80" CornerRadius="6" Background="#1D1D2C" BorderThickness="1" BorderBrush="#303045" HorizontalAlignment="Center" VerticalAlignment="Center" ClipToBounds="True">
+                    <Panel>
+                        <!-- Default CD Icon -->
+                        <Viewbox Width="44" Height="44" IsVisible="{Binding !PlayerViewModel.HasCoverImage}">
+                            <Path Data="M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Zm0,14.5A4.5,4.5,0,1,1,16.5,12,4.5,4.5,0,0,1,12,16.5Zm0-6A1.5,1.5,0,1,0,13.5,12,1.5,1.5,0,0,0,12,10.5Z" Fill="#4AB5FF" Opacity="0.5"/>
+                        </Viewbox>
+                        <!-- Album Art -->
+                        <Image Source="{Binding PlayerViewModel.CoverImage}" Stretch="UniformToFill" IsVisible="{Binding PlayerViewModel.HasCoverImage}"/>
+                    </Panel>
+                </Border>
+
+                <!-- Column 1: Track Details & Waveform -->
+                <Grid Grid.Column="1" RowDefinitions="Auto,*,Auto" Margin="10,2" VerticalAlignment="Stretch">
+                    <!-- Title & Artist -->
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="{i18n:Tr main.shutting_down}" IsVisible="{Binding IsShuttingDown}" FontSize="14" FontWeight="Bold" Foreground="#FF6B6B" />
+                        <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding !IsShuttingDown}">
+                            <!-- LIVE badge (streams only) -->
+                            <Border IsVisible="{Binding PlayerViewModel.IsLiveStream}"
+                                    Background="#CC0000" CornerRadius="3" Padding="5,1">
+                                <TextBlock Text="● LIVE" FontSize="11" FontWeight="Bold" Foreground="White"/>
+                            </Border>
+                            <TextBlock Text="{Binding PlayerViewModel.Artist}" FontWeight="Bold" FontSize="13" Foreground="#B0B0C5"/>
+                            <TextBlock Text="—" FontSize="13" Foreground="#8F8FA3"/>
+                            <TextBlock Text="{Binding PlayerViewModel.TitleDisplay}" FontWeight="SemiBold" FontSize="14" Foreground="White" TextTrimming="CharacterEllipsis"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Waveform (hidden for live streams) -->
+                    <ctrl:WaveformControl Grid.Row="1" Height="36" x:Name="PlayerWaveform"
+                                          IsVisible="{Binding PlayerViewModel.IsRegularTrack}"
+                                          Peaks="{Binding PlayerViewModel.WaveformPeaks}"
+                                          DurationMs="{Binding PlayerViewModel.DurationMs}"
+                                          PositionMs="{Binding PlayerViewModel.CurrentPositionMs}"
+                                          IntroCueMs="{Binding PlayerViewModel.IntroCueMs}"
+                                          OutroCueMs="{Binding PlayerViewModel.OutroCueMs}"
+                                          Markers="{Binding PlayerViewModel.Markers}" />
+
+                    <!-- Stream now-playing text (shown for live streams instead of waveform) -->
+                    <TextBlock Grid.Row="1" IsVisible="{Binding PlayerViewModel.IsLiveStream}"
+                               Text="{Binding PlayerViewModel.StreamNowPlaying}"
+                               FontSize="12" Foreground="#4AB5FF" VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis"/>
+
+                    <!-- Meta text (BPM, Category, Total Duration) -->
+                    <TextBlock Grid.Row="2" FontSize="10" Foreground="#6F6F85"
+                               Text="{Binding PlayerViewModel.MetaText}" />
+                </Grid>
+
+                <!-- Column 2: Remaining Countdown Clock (hidden for live streams) -->
+                <Border Grid.Column="2" Padding="8,4" Background="#0C0C14" CornerRadius="4" BorderThickness="1" BorderBrush="#202030" Margin="4,0" MinWidth="110" VerticalAlignment="Center"
+                        IsVisible="{Binding PlayerViewModel.IsRegularTrack}">
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock Text="{i18n:Tr main.remaining}" FontSize="9" FontWeight="Bold" Foreground="Gray" HorizontalAlignment="Center"/>
+                        <TextBlock Text="{Binding PlayerViewModel.RemainingTimeText}"
+                                   Foreground="{Binding PlayerViewModel.RemainingTimeBrush}"
+                                   FontSize="28" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Column 3: Playback Controls (RemoveFromPlayer, Loop, Play, Pause, Stop, Next) -->
+                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center" Margin="6,0">
+                    <Button Content="🗑" Focusable="False" Command="{Binding PlayerViewModel.RemoveFromPlayerCommand}" Width="36" Height="72" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" ToolTip.Tip="{i18n:Tr main.tip.remove_from_player}" />
+                    <ToggleButton Content="🔁" Focusable="False" IsChecked="{Binding PlayerViewModel.IsLoopEnabled}" Width="36" Height="72" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" ToolTip.Tip="{i18n:Tr main.tip.loop}" />
+                    <Button Content="{Binding PlayerViewModel.PlayPauseIcon}" Focusable="False" Command="{Binding PlayerViewModel.PlayPauseCommand}" Width="36" Height="72" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" ToolTip.Tip="{i18n:Tr main.tip.playpause}" Foreground="#5DDC8A" />
+                    <Button Content="■" Focusable="False" Command="{Binding PlayerViewModel.StopCommand}" Width="36" Height="72" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" ToolTip.Tip="{i18n:Tr main.tip.stop}" Foreground="#FF6B6B" />
+                    <Button Content="↠" Focusable="False" Command="{Binding PlayerViewModel.NextCommand}" Width="36" Height="72" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" ToolTip.Tip="{i18n:Tr main.tip.next}" />
+                </StackPanel>
+
+                <!-- Column 4: Stereo VU Meter -->
+                <Border Grid.Column="4" Width="44" Background="#0C0C14" CornerRadius="4" BorderThickness="1" BorderBrush="#202030" Padding="4,6" VerticalAlignment="Center" Height="80" Margin="4,0">
+                    <ctrl:VuMeterControl
+                        ValueLeft="{Binding PlayerViewModel.VuLeft}"
+                        ValueRight="{Binding PlayerViewModel.VuRight}" />
+                </Border>
+
+                <!-- Column 5: Analog-dot Clock -->
+                <Border Grid.Column="5" Width="140" Background="#0C0C14" CornerRadius="0,6,6,0" BorderThickness="1,0,0,0" BorderBrush="#202030" Padding="6,2">
+                    <ctrl:AnalogClockControl
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        TimeText="{Binding PlayerViewModel.CurrentTimeText}" />
+                </Border>
+
+            </Grid>
+        </Border>
+
+        <!-- ═══════════════════════════════════════════════════════════════════
+             BOTTOM BAR — module buttons + system controls
+             ═══════════════════════════════════════════════════════════════════ -->
+        <Border DockPanel.Dock="Bottom"
+                Background="#0A0A15"
+                Height="34"
+                Padding="4,0">
+
+            <Grid ColumnDefinitions="*,Auto">
+
+                <!-- Left: module buttons -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal"
+                            VerticalAlignment="Center" Spacing="2">
+
+                    <Button Content="TRACKS MANAGER"
+                            Focusable="False"
+                            Padding="8,4" FontSize="11"
+                            Background="#1A1A2E"
+                            Click="OnTracksManagerClicked" />
+
+                    <Button Content="PLAYLIST BUILDER"
+                            Focusable="False"
+                            Padding="8,4" FontSize="11"
+                            Background="#1A1A2E"
+                            Click="OnPlaylistBuilderClicked" />
+
+                    <Button Content="SCHEDULED EVENTS"
+                            Focusable="False"
+                            Padding="8,4" FontSize="11"
+                            Background="#1A1A2E"
+                            Click="OnScheduledEventsClicked" />
+
+                </StackPanel>
+
+                <!-- Centre: output triggers.
+                     Spans both columns and centres itself, so the pair sits at the true middle of
+                     the bar rather than the middle of the left column — which would be off to the
+                     left by half the width of the controls on the right.
+
+                     Each button both acts and reports: clicking toggles the module, the colour
+                     says whether it is running. Present only when the module is switched on in
+                     Settings — a station that never streams should not carry a control for it.
+
+                     The globe is drawn from Segoe MDL2 Assets, not the 🌐 emoji: emoji glyphs carry
+                     their own palette and ignore Foreground entirely, so the icon would stay
+                     globe-blue whatever the module was doing. The record dot is a text glyph at a
+                     larger size, because ● at the icon font's size renders far smaller than the
+                     globe and the pair looked mismatched. -->
+                <StackPanel Grid.Column="0" Grid.ColumnSpan="2"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Spacing="2">
+
+                    <Button Content="&#xE774;" Focusable="False" Padding="6,4" FontSize="13"
+                            FontFamily="Segoe MDL2 Assets,Segoe Fluent Icons"
+                            Foreground="{Binding StreamingIndicatorColor}"
+                            ToolTip.Tip="{Binding StreamingIndicatorTooltip}"
+                            IsVisible="{Binding IsStreamingModuleEnabled}"
+                            Command="{Binding ToggleStreamingCommand}" />
+
+                    <!-- A drawn circle, not the ● glyph: how much of its em a character actually
+                         inks is a property of the font, so FontSize could only ever approximate a
+                         match with the icon-font globe next to it. Width/Height are pixels and
+                         mean exactly what they say. -->
+                    <Button Focusable="False" Padding="6,4"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            ToolTip.Tip="{Binding RecordingIndicatorTooltip}"
+                            IsVisible="{Binding IsRecordingModuleEnabled}"
+                            Command="{Binding ToggleRecordingCommand}">
+                        <Ellipse Width="15" Height="15"
+                                 Fill="{Binding RecordingIndicatorColor}" />
+                    </Button>
+
+                </StackPanel>
+
+                <!-- Right: event bar + system buttons -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal"
+                            VerticalAlignment="Center" Spacing="2">
+
+                    <!-- Sweeper subcategory quick-select (pool filter).
+                         Shown only when Auto DJ "enable automatic sweepers" is on. -->
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                                IsVisible="{Binding SweeperSubcategory.IsSweeperEnabled}">
+                        <TextBlock Text="Sweeper" FontSize="10" Foreground="#66667A"
+                                   VerticalAlignment="Center" Margin="0,0,4,0" />
+                        <ComboBox ItemsSource="{Binding SweeperSubcategory.Options}"
+                                  SelectedItem="{Binding SweeperSubcategory.Selected}"
+                                  IsEnabled="{Binding SweeperSubcategory.IsAvailable}"
+                                  DropDownOpened="OnSweeperSubcategoryDropDownOpened"
+                                  MinWidth="108" FontSize="10" Margin="0,0,6,0"
+                                  Padding="6,2" MinHeight="0" VerticalAlignment="Center"
+                                  Background="Transparent"
+                                  BorderBrush="#26263400" BorderThickness="1"
+                                  Foreground="#9090A4"
+                                  ToolTip.Tip="{i18n:Tr main.tip.sweeper_subcategory}">
+                            <ComboBox.Styles>
+                                <!-- Subtle: faint outline only on hover; blends into the bar at rest -->
+                                <Style Selector="ComboBox:pointerover">
+                                    <Setter Property="BorderBrush" Value="#33334A" />
+                                    <Setter Property="Background" Value="#161624" />
+                                </Style>
+                            </ComboBox.Styles>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <Border Background="#111122"
+                            CornerRadius="2"
+                            Padding="10,4"
+                            MinWidth="200">
+                        <TextBlock Text="{Binding NextEventText}"
+                                   FontSize="11"
+                                   FontWeight="Bold"
+                                   Foreground="{Binding NextEventForeground}"
+                                   VerticalAlignment="Center" />
+                    </Border>
+
+                    <Button Content="■" Focusable="False" Padding="6,4" FontSize="11"
+                            ToolTip.Tip="{i18n:Tr main.tip.skip_event}"
+                            Command="{Binding SkipNextEventCommand}"
+                            IsEnabled="{Binding HasNextEvent}"
+                            Background="#2A0A0A" Foreground="#FF4444" />
+
+                    <Button Content="{Binding Session.CurrentUser.Username}"
+                            Focusable="False" Padding="8,4" FontSize="11"
+                            Foreground="#4CAF50"
+                            ToolTip.Tip="{i18n:Tr main.tip.user_menu}">
+                        <Button.Flyout>
+                            <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                <MenuItem Header="{i18n:Tr main.user.change_password}"
+                                          Click="OnChangePasswordClicked" />
+                                <MenuItem Header="{i18n:Tr main.user.switch_user}"
+                                          Click="OnSwitchUserClicked" />
+                            </MenuFlyout>
+                        </Button.Flyout>
+                    </Button>
+
+                    <Button Content="⌨" Focusable="False" Padding="6,4" FontSize="13"
+                            ToolTip.Tip="{i18n:Tr main.tip.hardware_manager}"
+                            IsVisible="{Binding Session.CanAccessSettings}"
+                            Click="OnHardwareManagerClicked" />
+
+                    <Button Content="⚙" Focusable="False" Padding="6,4" FontSize="13"
+                            ToolTip.Tip="{i18n:Tr main.tip.settings}"
+                            IsVisible="{Binding Session.CanAccessSettings}"
+                            Click="OnSettingsClicked" />
+
+                    <Button Content="⛶" Focusable="False" Padding="6,4" FontSize="13"
+                            ToolTip.Tip="{i18n:Tr main.tip.fullscreen}"
+                            Click="OnFullscreenClicked" />
+
+                </StackPanel>
+
+            </Grid>
+        </Border>
+
+        <!-- ═══════════════════════════════════════════════════════════════════
+             CONTENT AREA — playlist (left) + right tab panel
+             ═══════════════════════════════════════════════════════════════════ -->
+        <Grid ColumnDefinitions="39*,Auto,61*"
+              Background="#0F0F1A">
+
+            <!-- Left: Playlist -->
+            <views:PlaylistView Grid.Column="0"
+                                MinWidth="300"
+                                DataContext="{Binding PlaylistViewModel}" />
+
+            <GridSplitter Grid.Column="1" Width="4" Background="#1C1C2E" />
+
+            <!-- Right: Tab panel -->
+            <TabControl Grid.Column="2"
+                        Background="#0C0C18"
+                        Margin="2,0,0,0"
+                        SelectedIndex="{Binding SelectedTabIndex}">
+
+                <TabControl.Styles>
+                    <Style Selector="TabItem">
+                        <Setter Property="FontSize" Value="12"/>
+                        <Setter Property="Padding" Value="10,5"/>
+                    </Style>
+                </TabControl.Styles>
+
+                <TabItem Header="{i18n:Tr main.tab.search}">
+                    <views:LibraryView DataContext="{Binding LibraryViewModel}" />
+                </TabItem>
+
+                <TabItem Header="{i18n:Tr main.tab.history}">
+                    <views:HistoryView DataContext="{Binding HistoryViewModel}" />
+                </TabItem>
+
+                <TabItem x:Name="CartwallTab" Header="{i18n:Tr main.tab.cartwall}">
+                    <views:CartwallView DataContext="{Binding CartwallViewModel}" />
+                </TabItem>
+
+                <TabItem Header="{i18n:Tr main.tab.aux}">
+                    <views:AuxPlayersView DataContext="{Binding AuxPlayersViewModel}" />
+                </TabItem>
+
+            </TabControl>
+
+        </Grid>
+
+    </DockPanel>
+
+</Window>

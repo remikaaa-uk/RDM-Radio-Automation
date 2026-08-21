@@ -1,0 +1,286 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RDM.UI.ViewModels"
+        xmlns:i18n="using:RDM.UI.Localization"
+        x:Class="RDM.UI.Views.HardwareManagerWindow"
+        Icon="avares://RDM/Assets/rdm.ico"
+        x:DataType="vm:HardwareManagerViewModel"
+        Title="Hardware Manager"
+        Width="1000" Height="640"
+        MinWidth="700" MinHeight="400"
+        WindowStartupLocation="CenterOwner"
+        CanResize="True"
+        Background="#0F0F1A">
+
+    <Window.Styles>
+        <Style Selector="TextBlock">
+            <Setter Property="Foreground" Value="#CCCCDD"/>
+            <Setter Property="FontSize"   Value="12"/>
+        </Style>
+        <Style Selector="TextBox">
+            <Setter Property="Background"  Value="#0A0A15"/>
+            <Setter Property="Foreground"  Value="#CCCCDD"/>
+            <Setter Property="BorderBrush" Value="#2A2A3E"/>
+            <Setter Property="Padding"     Value="5,3"/>
+            <Setter Property="FontSize"    Value="12"/>
+        </Style>
+        <Style Selector="Button">
+            <Setter Property="Background" Value="#1C1C2E"/>
+            <Setter Property="Foreground" Value="#CCCCDD"/>
+            <Setter Property="Padding"    Value="8,4"/>
+            <Setter Property="FontSize"   Value="12"/>
+        </Style>
+        <Style Selector="Button:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#2A2A40"/>
+        </Style>
+        <Style Selector="DataGrid">
+            <Setter Property="Background"             Value="#0A0A15"/>
+            <Setter Property="Foreground"             Value="#CCCCDD"/>
+            <Setter Property="BorderBrush"            Value="#2A2A3E"/>
+            <Setter Property="GridLinesVisibility"    Value="Horizontal"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="#1A1A2E"/>
+            <Setter Property="RowBackground"          Value="#0A0A15"/>
+            <Setter Property="HeadersVisibility"      Value="Column"/>
+            <Setter Property="CanUserResizeColumns"   Value="True"/>
+            <Setter Property="CanUserSortColumns"     Value="False"/>
+            <Setter Property="FontSize"               Value="12"/>
+        </Style>
+        <Style Selector="DataGridColumnHeader">
+            <Setter Property="Background"   Value="#131320"/>
+            <Setter Property="Foreground"   Value="#8888AA"/>
+            <Setter Property="Padding"      Value="6,4"/>
+            <Setter Property="FontSize"     Value="11"/>
+        </Style>
+        <Style Selector="DataGridRow:selected /template/ Rectangle#BackgroundRectangle">
+            <Setter Property="Fill" Value="#1E3A5F"/>
+        </Style>
+        <Style Selector="TabControl">
+            <Setter Property="Background" Value="#0A0A15"/>
+        </Style>
+        <Style Selector="TabItem">
+            <Setter Property="Background" Value="#131320"/>
+            <Setter Property="Foreground" Value="#8888AA"/>
+            <Setter Property="FontSize"   Value="12"/>
+            <Setter Property="Padding"    Value="12,6"/>
+        </Style>
+        <Style Selector="TabItem:selected">
+            <Setter Property="Background" Value="#1C1C2E"/>
+            <Setter Property="Foreground" Value="#CCCCDD"/>
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#131320" Padding="16,10"
+                BorderThickness="0,0,0,1" BorderBrush="#1C1C2E">
+            <TextBlock Text="Hardware Manager" FontSize="18" FontWeight="Bold" Foreground="White"/>
+        </Border>
+
+        <!-- Tabs -->
+        <TabControl Grid.Row="1" Margin="0">
+
+            <!-- ── Tab 1: Trigger Mappings ──────────────────────────────────── -->
+            <TabItem Header="Trigger Mappings">
+                <Grid RowDefinitions="Auto,*">
+
+                    <!-- Toolbar -->
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="6" Margin="8,6">
+                        <Button Content="{i18n:Tr hw.add}" Click="OnAddTriggerMapping"/>
+                        <Button Content="{i18n:Tr hw.edit}"  Click="OnEditTriggerMapping"
+                                IsEnabled="{Binding SelectedTriggerMapping, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                        <Button Content="{i18n:Tr common.delete}"    Click="OnDeleteTriggerMapping"
+                                IsEnabled="{Binding SelectedTriggerMapping, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                        <Button Content="{i18n:Tr hw.learn}" Click="OnLearnTriggerMapping"
+                                IsEnabled="{Binding SelectedTriggerMapping, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                    </StackPanel>
+
+                    <!-- DataGrid -->
+                    <DataGrid x:Name="TriggerGrid" Grid.Row="1" Margin="8,0,8,8"
+                              ItemsSource="{Binding TriggerMappings}"
+                              SelectionChanged="OnTriggerSelectionChanged"
+                              SelectionMode="Single"
+                              IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="{i18n:Tr se.col.name}"        Binding="{Binding Name}"       Width="180"/>
+                            <DataGridTextColumn Header="{i18n:Tr hw.col.device_type}" Binding="{Binding DeviceType}" Width="110"/>
+                            <DataGridTextColumn Header="{i18n:Tr hw.col.device_id}" Binding="{Binding DeviceId}"   Width="110"/>
+                            <DataGridTextColumn Header="{i18n:Tr hw.col.signature}"    Binding="{Binding Signature}"   Width="160"/>
+                            <DataGridTextColumn Header="{i18n:Tr hw.col.action}"        Binding="{Binding ActionId}"    Width="180"/>
+                            <DataGridTextColumn Header="{i18n:Tr hw.col.parameter}"     Binding="{Binding Parameter}"   Width="140"/>
+                            <DataGridCheckBoxColumn Header="{i18n:Tr hw.col.active}"  Binding="{Binding IsEnabled}"   Width="70"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <!-- ── Tab 2: Feedback Mappings ─────────────────────────────────── -->
+            <TabItem Header="Feedback Mappings">
+                <Grid RowDefinitions="Auto,*">
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="6" Margin="8,6">
+                        <Button Content="{i18n:Tr hw.add}" Click="OnAddFeedbackMapping"/>
+                        <Button Content="{i18n:Tr hw.edit}" Click="OnEditFeedbackMapping"
+                                IsEnabled="{Binding SelectedFeedbackMapping, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                        <Button Content="{i18n:Tr common.delete}"   Click="OnDeleteFeedbackMapping"
+                                IsEnabled="{Binding SelectedFeedbackMapping, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                    </StackPanel>
+
+                    <DataGrid Grid.Row="1" Margin="8,0,8,8"
+                              ItemsSource="{Binding FeedbackMappings}"
+                              SelectedItem="{Binding SelectedFeedbackMapping}"
+                              SelectionMode="Single"
+                              IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="{i18n:Tr hw.col.event}"     Binding="{Binding EventName}"        Width="160"/>
+                            <DataGridTextColumn Header="{i18n:Tr hw.col.output_type}"   Binding="{Binding TargetDeviceType}" Width="100"/>
+                            <DataGridTextColumn Header="{i18n:Tr hw.col.device_id}" Binding="{Binding TargetDeviceId}"   Width="130"/>
+                            <DataGridTextColumn Header="{i18n:Tr hw.col.channel}"         Binding="{Binding Channel}"          Width="60"/>
+                            <DataGridTextColumn Header="{i18n:Tr hw.col.note_gpo}"      Binding="{Binding NoteCode}"         Width="70"/>
+                            <DataGridTextColumn Header="{i18n:Tr hw.col.serial_cmd}" Binding="{Binding SerialCommand}"   Width="140"/>
+                            <DataGridCheckBoxColumn Header="{i18n:Tr hw.col.active}"   Binding="{Binding IsEnabled}"        Width="70"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <!-- ── Tab 3: Macros ─────────────────────────────────────────────── -->
+            <TabItem Header="{i18n:Tr hw.tab.macros}">
+                <Grid ColumnDefinitions="280,*">
+
+                    <!-- Macros list (left) -->
+                    <Grid Grid.Column="0" RowDefinitions="Auto,*" Margin="8,6,4,8">
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="6" Margin="0,0,0,4">
+                            <Button Content="{i18n:Tr hw.add}" Click="OnAddMacro"/>
+                            <Button Content="{i18n:Tr hw.edit}" Click="OnEditMacro"
+                                    IsEnabled="{Binding SelectedMacro, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                            <Button Content="{i18n:Tr common.delete}"   Click="OnDeleteMacro"
+                                    IsEnabled="{Binding SelectedMacro, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                        </StackPanel>
+                        <DataGrid Grid.Row="1"
+                                  ItemsSource="{Binding Macros}"
+                                  SelectedItem="{Binding SelectedMacro}"
+                                  SelectionMode="Single"
+                                  IsReadOnly="True">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="{i18n:Tr se.col.name}"   Binding="{Binding Name}"      Width="*"/>
+                                <DataGridCheckBoxColumn Header="{i18n:Tr hw.col.act_short}" Binding="{Binding IsEnabled}" Width="40"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+
+                    <!-- Steps list (right) -->
+                    <Grid Grid.Column="1" RowDefinitions="Auto,*" Margin="4,6,8,8">
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="6" Margin="0,0,0,4">
+                            <TextBlock VerticalAlignment="Center" Foreground="#8888AA"
+                                       Text="{Binding SelectedMacro.Name, StringFormat='Kroki: {0}', FallbackValue='Wybierz makro'}"/>
+                            <Button Content="{i18n:Tr hw.add_step}"  Click="OnAddMacroStep"
+                                    IsEnabled="{Binding SelectedMacro, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                            <Button Content="{i18n:Tr hw.edit_step}" Click="OnEditMacroStep"
+                                    IsEnabled="{Binding SelectedMacroStep, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                            <Button Content="{i18n:Tr hw.delete_step}"   Click="OnDeleteMacroStep"
+                                    IsEnabled="{Binding SelectedMacroStep, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                        </StackPanel>
+                        <DataGrid Grid.Row="1"
+                                  ItemsSource="{Binding SelectedMacro.Steps}"
+                                  SelectedItem="{Binding SelectedMacroStep}"
+                                  SelectionMode="Single"
+                                  IsReadOnly="True">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="{i18n:Tr hw.col.order}"  Binding="{Binding StepOrder}"    Width="70"/>
+                                <DataGridTextColumn Header="{i18n:Tr hw.col.action}"      Binding="{Binding ActionId}"     Width="160"/>
+                                <DataGridTextColumn Header="{i18n:Tr hw.col.parameter}"   Binding="{Binding Parameter}"    Width="130"/>
+                                <DataGridTextColumn Header="{i18n:Tr hw.col.out_cmd}" Binding="{Binding OutputCommand}" Width="120"/>
+                                <DataGridTextColumn Header="{i18n:Tr hw.col.delay}" Binding="{Binding DelayAfterMs}" Width="80"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </Grid>
+            </TabItem>
+
+            <!-- ── Tab 4: Scripts ────────────────────────────────────────────── -->
+            <TabItem Header="{i18n:Tr hw.tab.scripts}">
+                <Grid ColumnDefinitions="240,*">
+
+                    <!-- Scripts list (left) -->
+                    <Grid Grid.Column="0" RowDefinitions="Auto,*" Margin="8,6,4,8">
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="6" Margin="0,0,0,4">
+                            <Button Content="{i18n:Tr hw.new}"   Click="OnAddScript"/>
+                            <Button Content="{i18n:Tr common.delete}"   Click="OnDeleteScript"
+                                    IsEnabled="{Binding SelectedScript, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                        </StackPanel>
+                        <DataGrid Grid.Row="1"
+                                  ItemsSource="{Binding Scripts}"
+                                  SelectedItem="{Binding SelectedScript}"
+                                  SelectionMode="Single"
+                                  IsReadOnly="True">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="{i18n:Tr se.col.name}"   Binding="{Binding Name}"      Width="*"/>
+                                <DataGridCheckBoxColumn Header="{i18n:Tr hw.col.act_short}" Binding="{Binding IsEnabled}" Width="40"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+
+                    <!-- Script editor (right) -->
+                    <Grid Grid.Column="1" RowDefinitions="Auto,Auto,*,Auto" Margin="4,6,8,8">
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="6" Margin="0,0,0,4">
+                            <Button Content="{i18n:Tr hw.save_script}" Click="OnSaveScript"/>
+                        </StackPanel>
+                        <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto,*" Margin="0,0,0,6">
+                            <TextBlock Grid.Column="0" Text="{i18n:Tr hw.name_label}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBox   Grid.Column="1" Name="ScriptNameBox" Margin="0,0,12,0"/>
+                            <TextBlock Grid.Column="2" Text="{i18n:Tr hw.active_label}" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <CheckBox  Grid.Column="3" Name="ScriptEnabledBox" Foreground="#CCCCDD"/>
+                        </Grid>
+                        <TextBox Grid.Row="2" Name="ScriptBodyBox"
+                                 AcceptsReturn="True" AcceptsTab="True"
+                                 TextWrapping="NoWrap"
+                                 FontFamily="Consolas,Cascadia Code,Courier New"
+                                 FontSize="12"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                 Background="#07070F"
+                                 Foreground="#CCCCDD"/>
+                        <TextBlock Grid.Row="3" Margin="0,4,0,0" FontSize="10" Foreground="#555577"
+                                   Text="API: player.play/stop/next/pause() | mic.on/off/toggle() | cart.selectTab(n) cart.triggerSlot(n) | rdm.sendHttp(url) rdm.sendSerial(id,cmd) rdm.delay(ms) rdm.log(msg)"/>
+                    </Grid>
+                </Grid>
+            </TabItem>
+
+        </TabControl>
+
+        <!-- Footer — telemetria + zamknij -->
+        <Border Grid.Row="2" Background="#131320" Padding="12,8"
+                BorderThickness="0,1,0,0" BorderBrush="#1C1C2E">
+            <Grid ColumnDefinitions="*,Auto">
+
+                <!-- Metryki IHardwareMetrics -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <TextBlock Text="{i18n:Tr hw.m.queue}" Foreground="#555577" FontSize="11"/>
+                        <TextBlock Text="{Binding QueueLength}" Foreground="#8888AA" FontSize="11"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <TextBlock Text="{i18n:Tr hw.m.time}" Foreground="#555577" FontSize="11"/>
+                        <TextBlock Text="{Binding ExecutionTimeMs}" Foreground="#8888AA" FontSize="11"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <TextBlock Text="{i18n:Tr hw.m.throttled}" Foreground="#555577" FontSize="11"/>
+                        <TextBlock Text="{Binding ThrottledEventsCount}" Foreground="#8888AA" FontSize="11"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <TextBlock Text="{i18n:Tr hw.m.dedup}" Foreground="#555577" FontSize="11"/>
+                        <TextBlock Text="{Binding DeduplicatedEventsCount}" Foreground="#8888AA" FontSize="11"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <TextBlock Text="{i18n:Tr hw.m.errors}" Foreground="#555577" FontSize="11"/>
+                        <TextBlock Text="{Binding HardwareErrorCount}" Foreground="#FF6666" FontSize="11"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <Button Grid.Column="1" Content="{i18n:Tr common.close}" Click="OnClose" Padding="16,5"/>
+            </Grid>
+        </Border>
+
+    </Grid>
+</Window>

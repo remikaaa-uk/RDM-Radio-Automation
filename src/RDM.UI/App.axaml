@@ -1,0 +1,85 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="RDM.UI.App"
+             RequestedThemeVariant="Dark">
+
+    <Application.Resources>
+        <!-- Scrollbar track width. Declared explicitly rather than inherited from Fluent so the
+             overlay footprint is a known number: row content that must stay clickable (the
+             playlist's per-row buttons) is given exactly this much clearance. -->
+        <x:Double x:Key="ScrollBarSize">11</x:Double>
+    </Application.Resources>
+
+    <Application.Styles>
+        <FluentTheme />
+        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" />
+
+        <!-- ══════════════════════════════════════════════════════════════════
+             Scrollbars: a permanent hairline that never expands.
+
+             Fluent's ScrollBar keeps the thumb at full width and squeezes it with a
+             ScaleTransform while collapsed; [IsExpanded=true] then sets RenderTransform
+             to "none" and fades the arrow buttons in (Opacity 0 -> 1). So expansion is
+             NOT a width change — pinning Width/MaxWidth on the ScrollBar does nothing,
+             which is why the earlier attempt in PlaylistBuilderWindow had no effect.
+             Countering it means re-applying the scale transform and holding the buttons
+             at zero opacity in the expanded state.
+
+             Why it matters beyond looks: the scrollbar is an overlay (the ScrollViewer's
+             content presenter spans underneath it), so an expanded bar covers the right
+             edge of every row — including the per-row PFL/info/remove buttons in the
+             playlist — and swallows their clicks.
+             ══════════════════════════════════════════════════════════════════ -->
+
+        <!-- Always visible: no fade-out when scrolling stops. -->
+        <Style Selector="ScrollBar">
+            <Setter Property="AllowAutoHide" Value="False" />
+        </Style>
+
+        <!-- Hold the thumb at its collapsed hairline scale while expanded. -->
+        <Style Selector="ScrollBar:vertical[IsExpanded=true] /template/ Thumb">
+            <Setter Property="RenderTransform"
+                    Value="{DynamicResource VerticalSmallScrollThumbScaleTransform}" />
+        </Style>
+        <Style Selector="ScrollBar:horizontal[IsExpanded=true] /template/ Thumb">
+            <Setter Property="RenderTransform"
+                    Value="{DynamicResource HorizontalSmallScrollThumbScaleTransform}" />
+        </Style>
+
+        <!-- Never reveal the line-up/line-down arrows. IsHitTestVisible too, not just
+             Opacity: a fully transparent control still takes clicks in Avalonia, so the
+             buttons would keep stealing presses meant for the row underneath. -->
+        <Style Selector="ScrollBar /template/ RepeatButton">
+            <Setter Property="IsHitTestVisible" Value="False" />
+        </Style>
+        <Style Selector="ScrollBar[IsExpanded=true] /template/ RepeatButton">
+            <Setter Property="Opacity" Value="0" />
+        </Style>
+
+        <!-- Clear ("✕") button injected into the left edge of search boxes by ctrl:SearchBoxBehavior.
+             Red accent — same family as the AUTO/mic active state (#CC3333). -->
+        <Style Selector="Button.searchclear">
+            <Setter Property="Background"                  Value="Transparent"/>
+            <Setter Property="BorderThickness"             Value="0"/>
+            <Setter Property="Foreground"                  Value="#CC3333"/>
+            <Setter Property="Padding"                     Value="0"/>
+            <Setter Property="Width"                       Value="20"/>
+            <Setter Property="Height"                      Value="20"/>
+            <Setter Property="FontSize"                    Value="11"/>
+            <Setter Property="Cursor"                      Value="Hand"/>
+            <Setter Property="Margin"                      Value="0,0,4,0"/>
+            <Setter Property="VerticalAlignment"           Value="Center"/>
+            <Setter Property="HorizontalContentAlignment"  Value="Center"/>
+            <Setter Property="VerticalContentAlignment"    Value="Center"/>
+        </Style>
+        <Style Selector="Button.searchclear:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#E74C4C"/>
+        </Style>
+        <Style Selector="Button.searchclear:pressed /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#8B1A1A"/>
+        </Style>
+    </Application.Styles>
+
+</Application>

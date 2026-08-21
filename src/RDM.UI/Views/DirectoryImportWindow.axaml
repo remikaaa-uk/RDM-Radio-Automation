@@ -1,0 +1,444 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i18n="using:RDM.UI.Localization"
+        x:Class="RDM.UI.Views.DirectoryImportWindow"
+        Icon="avares://RDM/Assets/rdm.ico"
+        Title="Directory Import"
+        Width="820" Height="530"
+        MinWidth="640" MinHeight="380"
+        WindowStartupLocation="CenterOwner"
+        CanResize="True"
+        Background="#1C1C2E">
+
+    <Window.Styles>
+        <Style Selector="ComboBox">
+            <Setter Property="FontSize"  Value="11" />
+            <Setter Property="Padding"   Value="6,3" />
+        </Style>
+        <Style Selector="TextBox">
+            <Setter Property="FontSize"  Value="11" />
+            <Setter Property="Padding"   Value="5,3" />
+        </Style>
+        <Style Selector="CheckBox">
+            <Setter Property="FontSize"  Value="11" />
+        </Style>
+        <Style Selector="Button">
+            <Setter Property="FontSize"  Value="11" />
+        </Style>
+    </Window.Styles>
+
+    <DockPanel LastChildFill="True">
+
+        <!-- ═══ Black header ══════════════════════════════════════════════════ -->
+        <Border DockPanel.Dock="Top"
+                Background="Black"
+                Height="48"
+                Padding="12,0">
+            <TextBlock Text="Directory Import"
+                       Foreground="White"
+                       FontSize="20"
+                       FontWeight="Bold"
+                       VerticalAlignment="Center" />
+        </Border>
+
+        <!-- ═══ Bottom button bar ════════════════════════════════════════════ -->
+        <Border DockPanel.Dock="Bottom"
+                Background="#0D0D1A"
+                Padding="6,5"
+                BorderThickness="0,1,0,0"
+                BorderBrush="#1C1C2E">
+            <Grid ColumnDefinitions="*,Auto,6,Auto">
+
+                <Button x:Name="ImportDirectoryButton"
+                        Grid.Column="1"
+                        Padding="14,5"
+                        VerticalAlignment="Center"
+                        Click="OnImportDirectoryClicked">
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <TextBlock Text="⬇" FontSize="12" VerticalAlignment="Center" />
+                        <TextBlock Text="{i18n:Tr di.import_dir}" FontSize="11" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <Button x:Name="CloseButton"
+                        Grid.Column="3"
+                        Content="{i18n:Tr common.close}"
+                        Padding="10,5"
+                        VerticalAlignment="Center"
+                        Click="OnCloseClicked" />
+
+            </Grid>
+        </Border>
+
+        <!-- ═══ Main content ════════════════════════════════════════════════ -->
+        <Grid RowDefinitions="Auto,Auto,*,Auto">
+
+            <!-- ─── Path row ─────────────────────────────────────────────── -->
+            <Border Grid.Row="0"
+                    Background="#111122"
+                    Padding="6,5"
+                    BorderThickness="0,0,0,1"
+                    BorderBrush="#1C1C2E">
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBox x:Name="PathTextBox"
+                             Grid.Column="0"
+                             VerticalAlignment="Center"
+                             ToolTip.Tip="{i18n:Tr di.tip.path}" />
+                    <Button x:Name="BrowsePathButton"
+                            Grid.Column="1"
+                            Width="28"
+                            Margin="4,0,0,0"
+                            Padding="3"
+                            VerticalAlignment="Center"
+                            ToolTip.Tip="{i18n:Tr di.tip.browse}"
+                            Click="OnBrowsePathClicked">
+                        <TextBlock Text="📁"
+                                   FontSize="11"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Center" />
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- ─── "Import Settings" label ──────────────────────────────── -->
+            <TextBlock Grid.Row="1"
+                       Text="{i18n:Tr di.import_settings}"
+                       FontSize="10"
+                       FontWeight="Bold"
+                       Foreground="#6666AA"
+                       Margin="10,5,0,3" />
+
+            <!-- ─── Two-column settings area ─────────────────────────────── -->
+            <Grid Grid.Row="2"
+                  ColumnDefinitions="0.55*,0.45*">
+
+                <!-- ════ LEFT COLUMN ════════════════════════════════════════ -->
+                <Grid Grid.Column="0"
+                      RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
+                      ColumnDefinitions="100,*,Auto"
+                      Margin="8,2,4,4">
+
+                    <!-- Row 0: Complete Scan -->
+                    <TextBlock Grid.Row="0" Grid.Column="0"
+                               Text="{i18n:Tr di.complete_scan}"
+                               Foreground="LightGray"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Center"
+                               Margin="0,0,8,0" />
+                    <StackPanel Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
+                                Orientation="Horizontal"
+                                Spacing="4"
+                                VerticalAlignment="Center"
+                                Margin="0,3,0,3">
+                        <CheckBox x:Name="CompleteScanCheckBox"
+                                  IsChecked="True" />
+                        <TextBlock Text="{i18n:Tr di.incl_subdirs}"
+                                   Foreground="LightGray"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <!-- Row 1: Category + Categories button -->
+                    <TextBlock Grid.Row="1" Grid.Column="0"
+                               Text="{i18n:Tr tm.col.category}"
+                               Foreground="LightGray"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Center"
+                               Margin="0,0,8,0" />
+                    <ComboBox x:Name="CategoryComboBox"
+                              Grid.Row="1" Grid.Column="1"
+                              HorizontalAlignment="Stretch"
+                              Margin="0,3">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name}" FontSize="11" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <Button Grid.Row="1" Grid.Column="2"
+                            Content="+" Width="26" Padding="3"
+                            Margin="4,3,0,3"
+                            VerticalAlignment="Center"
+                            ToolTip.Tip="{i18n:Tr di.tip.manage_categories}"
+                            Click="OnCategoriesClicked" />
+
+                    <!-- Row 2: Subcategory -->
+                    <TextBlock Grid.Row="2" Grid.Column="0"
+                               Text="{i18n:Tr tm.col.subcategory}"
+                               Foreground="LightGray"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Center"
+                               Margin="0,0,8,0" />
+                    <ComboBox x:Name="SubcategoryComboBox"
+                              Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
+                              HorizontalAlignment="Stretch"
+                              Margin="0,3">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name}" FontSize="11" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+
+                    <!-- Row 3: Genre + Auto checkbox -->
+                    <TextBlock Grid.Row="3" Grid.Column="0"
+                               Text="{i18n:Tr tm.col.genre}"
+                               Foreground="LightGray"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Center"
+                               Margin="0,0,8,0" />
+                    <ComboBox x:Name="GenreComboBox"
+                              Grid.Row="3" Grid.Column="1"
+                              HorizontalAlignment="Stretch"
+                              Margin="0,3">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name}" FontSize="11" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <CheckBox x:Name="AutoGenreCheckBox"
+                              Grid.Row="3" Grid.Column="2"
+                              Content="Auto"
+                              IsChecked="True"
+                              VerticalAlignment="Center"
+                              Margin="6,3,0,3" />
+
+                    <!-- Row 4: Track Type -->
+                    <TextBlock Grid.Row="4" Grid.Column="0"
+                               Text="{i18n:Tr ti.track_type}"
+                               Foreground="LightGray"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Center"
+                               Margin="0,0,8,0" />
+                    <ComboBox x:Name="TrackTypeComboBox"
+                              Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2"
+                              HorizontalAlignment="Stretch"
+                              Margin="0,3" />
+
+                    <!-- Row 5: Play track for X times and then [action] -->
+                    <TextBlock Grid.Row="5" Grid.Column="0"
+                               Text="{i18n:Tr di.play_track_for}"
+                               Foreground="LightGray"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Center"
+                               Margin="0,0,8,0" />
+                    <Grid Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2"
+                          ColumnDefinitions="50,Auto,*"
+                          Margin="0,3">
+                        <TextBox x:Name="PlayTrackForTextBox"
+                                 Grid.Column="0"
+                                 Text="0"
+                                 VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="1"
+                                   Text="{i18n:Tr ti.times_then}"
+                                   Foreground="LightGray"
+                                   VerticalAlignment="Center"
+                                   Margin="5,0" />
+                        <ComboBox x:Name="AfterPlayComboBox"
+                                  Grid.Column="2"
+                                  HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Center" />
+                    </Grid>
+
+                    <!-- Row 6: Start Date -->
+                    <TextBlock Grid.Row="6" Grid.Column="0"
+                               Text="{i18n:Tr te.date_start}"
+                               Foreground="LightGray"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Center"
+                               Margin="0,0,8,0" />
+                    <Grid Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2"
+                          ColumnDefinitions="Auto,*,28"
+                          Margin="0,3">
+                        <CheckBox x:Name="StartDateEnabledCheckBox"
+                                  Grid.Column="0"
+                                  VerticalAlignment="Center"
+                                  Margin="0,0,4,0" />
+                        <TextBox x:Name="StartDateTextBox"
+                                 Grid.Column="1"
+                                 VerticalAlignment="Center" />
+                        <Button x:Name="StartDatePickerButton"
+                                Grid.Column="2"
+                                Width="26"
+                                Margin="3,0,0,0"
+                                Padding="2"
+                                Content="▼"
+                                VerticalAlignment="Center"
+                                Click="OnStartDatePickerClicked" />
+                    </Grid>
+
+                    <!-- Row 7: End Date -->
+                    <TextBlock Grid.Row="7" Grid.Column="0"
+                               Text="{i18n:Tr te.date_end}"
+                               Foreground="LightGray"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Center"
+                               Margin="0,0,8,0" />
+                    <Grid Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="2"
+                          ColumnDefinitions="Auto,*,28"
+                          Margin="0,3">
+                        <CheckBox x:Name="EndDateEnabledCheckBox"
+                                  Grid.Column="0"
+                                  VerticalAlignment="Center"
+                                  Margin="0,0,4,0" />
+                        <TextBox x:Name="EndDateTextBox"
+                                 Grid.Column="1"
+                                 VerticalAlignment="Center" />
+                        <Button x:Name="EndDatePickerButton"
+                                Grid.Column="2"
+                                Width="26"
+                                Margin="3,0,0,0"
+                                Padding="2"
+                                Content="▼"
+                                VerticalAlignment="Center"
+                                Click="OnEndDatePickerClicked" />
+                    </Grid>
+
+                </Grid>
+
+                <!-- ════ RIGHT COLUMN ═══════════════════════════════════════ -->
+                <Grid Grid.Column="1"
+                      RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
+                      Margin="4,2,8,4">
+
+                    <!-- Row 0: BS1770 Loudness Analyze (disabled) -->
+                    <Grid Grid.Row="0"
+                          ColumnDefinitions="*,Auto"
+                          Margin="0,3">
+                        <TextBlock Grid.Column="0"
+                                   Text="BS1770 Loudness Analyze"
+                                   Foreground="#555577"
+                                   HorizontalAlignment="Right"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,8,0" />
+                        <CheckBox x:Name="Bs1770CheckBox"
+                                  Grid.Column="1"
+                                  IsEnabled="False"
+                                  VerticalAlignment="Center" />
+                    </Grid>
+
+                    <!-- Row 1: Auto BPM -->
+                    <Grid Grid.Row="1"
+                          ColumnDefinitions="*,Auto"
+                          Margin="0,3">
+                        <TextBlock Grid.Column="0"
+                                   Text="Auto BPM"
+                                   Foreground="LightGray"
+                                   HorizontalAlignment="Right"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,8,0" />
+                        <CheckBox x:Name="AutoBpmCheckBox"
+                                  Grid.Column="1"
+                                  IsChecked="True"
+                                  VerticalAlignment="Center" />
+                    </Grid>
+
+                    <!-- Row 2: Track Status -->
+                    <Grid Grid.Row="2"
+                          ColumnDefinitions="*,Auto"
+                          Margin="0,3">
+                        <TextBlock Grid.Column="0"
+                                   Text="{i18n:Tr ti.track_status}"
+                                   Foreground="LightGray"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Right"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,8,0" />
+                        <ComboBox x:Name="TrackStatusComboBox"
+                                  Grid.Column="1"
+                                  MinWidth="110"
+                                  VerticalAlignment="Center" />
+                    </Grid>
+
+                    <!-- Row 3: "Read from" label -->
+                    <TextBlock Grid.Row="3"
+                               Text="{i18n:Tr ti.read_from}"
+                               FontSize="10"
+                               FontWeight="Bold"
+                               Foreground="#6666AA"
+                               HorizontalAlignment="Right"
+                               Margin="0,6,8,2" />
+
+                    <!-- Row 4: Read .RDM + Read ID3 -->
+                    <Grid Grid.Row="4"
+                          ColumnDefinitions="*,Auto,Auto,Auto"
+                          Margin="0,3">
+                        <TextBlock Grid.Column="0"
+                                   Text="Read .RDM"
+                                   Foreground="LightGray"
+                                   HorizontalAlignment="Right"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,8,0" />
+                        <CheckBox x:Name="ReadRdmCheckBox"
+                                  Grid.Column="1"
+                                  IsChecked="True"
+                                  VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="2"
+                                   Text="Read ID3"
+                                   Foreground="LightGray"
+                                   VerticalAlignment="Center"
+                                   Margin="12,0,8,0" />
+                        <CheckBox x:Name="ReadId3CheckBox"
+                                  Grid.Column="3"
+                                  IsChecked="True"
+                                  VerticalAlignment="Center" />
+                    </Grid>
+
+                    <!-- Row 5: Read .WFRM -->
+                    <Grid Grid.Row="5"
+                          ColumnDefinitions="*,Auto,Auto,Auto"
+                          Margin="0,3">
+                        <TextBlock Grid.Column="0"
+                                   Text="Read .WFRM"
+                                   Foreground="LightGray"
+                                   HorizontalAlignment="Right"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,8,0" />
+                        <CheckBox x:Name="ReadWfrmCheckBox"
+                                  Grid.Column="1"
+                                  IsChecked="True"
+                                  VerticalAlignment="Center" />
+                    </Grid>
+
+                    <!-- Row 6: placeholder -->
+                    <Grid Grid.Row="6" />
+
+                    <!-- Row 7: placeholder -->
+                    <Grid Grid.Row="7" />
+
+                </Grid>
+
+            </Grid>
+
+            <!-- ─── Compact progress panel (hidden until import starts) ──── -->
+            <Border x:Name="ProgressPanel"
+                    Grid.Row="3"
+                    IsVisible="False"
+                    Margin="8,4,8,5"
+                    Padding="6,4"
+                    Background="#0D0D1A"
+                    CornerRadius="3">
+                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,5,Auto">
+                    <TextBlock x:Name="ProgressStatusText"
+                               Grid.Row="0" Grid.Column="0"
+                               Text="{i18n:Tr di.preparing}"
+                               FontSize="11" Foreground="#AAAACC"
+                               VerticalAlignment="Center" />
+                    <TextBlock x:Name="ProgressCountText"
+                               Grid.Row="0" Grid.Column="1"
+                               FontSize="11" Foreground="#4AB5FF"
+                               VerticalAlignment="Center" Margin="8,0,0,0" />
+                    <ProgressBar x:Name="ImportProgressBar"
+                                 Grid.Row="2" Grid.ColumnSpan="2"
+                                 Height="5"
+                                 Minimum="0" Maximum="1" Value="0"
+                                 Foreground="#4AB5FF"
+                                 Background="#1C1C2E" />
+                </Grid>
+            </Border>
+
+        </Grid>
+
+    </DockPanel>
+
+</Window>

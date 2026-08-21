@@ -1,0 +1,486 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RDM.UI.ViewModels"
+        xmlns:dto="using:RDM.Shared.DTOs"
+        xmlns:i18n="using:RDM.UI.Localization"
+        xmlns:ctrl="using:RDM.UI.Controls"
+        x:Class="RDM.UI.Views.PlaylistBuilderWindow"
+        Icon="avares://RDM/Assets/rdm.ico"
+        x:DataType="vm:PlaylistBuilderViewModel"
+        x:Name="Root"
+        Title="Playlist Builder"
+        Width="1400" Height="820"
+        WindowStartupLocation="CenterOwner"
+        CanResize="True"
+        MinWidth="900" MinHeight="540">
+
+    <DockPanel>
+
+        <!-- ═══ MENU BAR ════════════════════════════════════════════════════════════ -->
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="{i18n:Tr tm.menu.file}">
+                <MenuItem Header="{i18n:Tr pb.menu.new}"   Command="{Binding NewPlaylistCommand}"/>
+                <MenuItem Header="{i18n:Tr pb.menu.save}"           Click="OnMenuSaveClicked"/>
+                <Separator/>
+                <MenuItem Header="{i18n:Tr pb.menu.open}"  Click="OnMenuOpenClicked"/>
+                <MenuItem Header="{i18n:Tr pb.menu.delete}"    Click="OnMenuDeleteClicked"/>
+            </MenuItem>
+            <MenuItem Header="{i18n:Tr tm.menu.edit}"/>
+            <MenuItem Header="Import"/>
+            <MenuItem Header="{i18n:Tr pb.menu.events}"/>
+            <MenuItem Header="{i18n:Tr pb.menu.options}"/>
+        </Menu>
+
+        <!-- ═══ TITLE ROW ═══════════════════════════════════════════════════════════ -->
+        <Border DockPanel.Dock="Top" Height="38" Background="#0A0A14"
+                BorderThickness="0,0,0,1" BorderBrush="#1C1C2E" Padding="10,0">
+            <Grid ColumnDefinitions="*,Auto,Auto">
+                <TextBox Grid.Column="0"
+                         Text="{Binding PlaylistName}"
+                         FontSize="19" FontWeight="Bold"
+                         Background="Transparent" BorderThickness="0"
+                         VerticalAlignment="Center" Padding="0"/>
+                <TextBlock Grid.Column="1"
+                           Text="{i18n:Tr pb.unsaved}"
+                           FontSize="11" Foreground="#FF9800"
+                           VerticalAlignment="Center" Margin="8,0,16,0"
+                           IsVisible="{Binding HasUnsavedChanges}"/>
+                <TextBlock Grid.Column="2"
+                           Text="Playlist Builder"
+                           FontSize="13" Foreground="#555577"
+                           VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <!-- ═══ MAIN: Library (left) | Playlist (right) ═════════════════════════════ -->
+        <Grid ColumnDefinitions="*,1,650">
+
+            <!-- ── LEFT: Library ─────────────────────────────────────────────────── -->
+            <Grid Grid.Column="0" RowDefinitions="Auto,*,Auto" Background="#0F0F1A">
+
+                <!-- Filter row -->
+                <Border Grid.Row="0" Background="#0D0D1A" Padding="4,3"
+                        BorderThickness="0,0,0,1" BorderBrush="#1C1C2E">
+                    <StackPanel Orientation="Horizontal" Spacing="3">
+                        <TextBox Text="{Binding LibrarySearch}"
+                                 Watermark="{i18n:Tr pb.search}"
+                                 ctrl:SearchBoxBehavior.ShowClearButton="True"
+                                 MinWidth="200" Height="22"
+                                 Padding="6,2" FontSize="11"/>
+                        <ComboBox ItemsSource="{Binding Formats}"
+                                  SelectedItem="{Binding SelectedFormat}"
+                                  PlaceholderText="{i18n:Tr library.filter.any_category}"
+                                  Height="22" FontSize="10" Padding="4,2" MinWidth="100">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="dto:AssetFormatDto">
+                                    <TextBlock Text="{Binding Name}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <ComboBox ItemsSource="{Binding SubcategoryFilters}"
+                                  SelectedItem="{Binding SelectedSubcategory}"
+                                  PlaceholderText="{i18n:Tr library.filter.any_subcategory}"
+                                  Height="22" FontSize="10" Padding="4,2" MinWidth="70">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="dto:SubcategoryDto">
+                                    <TextBlock Text="{Binding Name}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <ComboBox ItemsSource="{Binding GenreFilters}"
+                                  SelectedItem="{Binding SelectedGenre}"
+                                  Height="22" FontSize="10" Padding="4,2" MinWidth="120" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Library DataGrid -->
+                <DataGrid Grid.Row="1"
+                          ItemsSource="{Binding LibraryItems}"
+                          SelectedItem="{Binding SelectedLibraryItem, Mode=TwoWay}"
+                          CanUserSortColumns="True"
+                          CanUserResizeColumns="True"
+                          CanUserReorderColumns="False"
+                          AutoGenerateColumns="False"
+                          GridLinesVisibility="None"
+                          Background="#0F0F1A"
+                          HeadersVisibility="Column"
+                          Sorting="OnLibraryGridSorting"
+                          DoubleTapped="OnLibraryItemDoubleTapped">
+
+                    <DataGrid.Styles>
+                        <Style Selector="DataGridColumnHeader">
+                            <Setter Property="Background"                Value="#131320"/>
+                            <Setter Property="Foreground"                Value="#6666AA"/>
+                            <Setter Property="FontSize"                  Value="10"/>
+                            <Setter Property="FontWeight"                Value="SemiBold"/>
+                            <Setter Property="Padding"                   Value="4,3"/>
+                            <Setter Property="MinHeight"                 Value="22"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                            <Setter Property="BorderThickness"           Value="0,0,0,1"/>
+                            <Setter Property="BorderBrush"               Value="#1C1C2E"/>
+                        </Style>
+                        <Style Selector="DataGridColumnHeader:hover">
+                            <Setter Property="Background" Value="#1C1C2E"/>
+                            <Setter Property="Foreground" Value="#9999CC"/>
+                        </Style>
+                        <Style Selector="DataGridRow">
+                            <Setter Property="Background" Value="#0F0F1A"/>
+                            <Setter Property="Foreground" Value="LightGray"/>
+                            <Setter Property="FontSize"   Value="11"/>
+                            <Setter Property="MinHeight"  Value="24"/>
+                        </Style>
+                        <Style Selector="DataGridRow:nth-child(2n)">
+                            <Setter Property="Background" Value="#141420"/>
+                        </Style>
+                        <Style Selector="DataGridCell">
+                            <Setter Property="Padding"         Value="4,3"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Foreground"      Value="LightGray"/>
+                        </Style>
+                        <Style Selector="DataGridRow:selected DataGridCell">
+                            <Setter Property="Background" Value="#22336688"/>
+                            <Setter Property="Foreground" Value="White"/>
+                        </Style>
+                        <Style Selector="DataGridCell:current">
+                            <Setter Property="BorderBrush"     Value="Transparent"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                        </Style>
+                    </DataGrid.Styles>
+
+                    <DataGrid.Columns>
+
+                        <DataGridTemplateColumn Header="{i18n:Tr pb.hdr.artist}" Width="*" SortMemberPath="Artist">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="vm:BuilderLibraryItemViewModel">
+                                    <TextBlock Text="{Binding Artist}"
+                                               HorizontalAlignment="Left"
+                                               VerticalAlignment="Center"
+                                               TextTrimming="CharacterEllipsis"
+                                               Margin="4,0"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Header="{i18n:Tr pb.hdr.title}" Width="*" SortMemberPath="Title">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="vm:BuilderLibraryItemViewModel">
+                                    <TextBlock Text="{Binding Title}"
+                                               FontWeight="SemiBold"
+                                               HorizontalAlignment="Left"
+                                               VerticalAlignment="Center"
+                                               TextTrimming="CharacterEllipsis"
+                                               Foreground="LightGray"
+                                               Margin="4,0"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Header="INTRO" Width="70" SortMemberPath="IntroMs">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="vm:BuilderLibraryItemViewModel">
+                                    <TextBlock Text="{Binding IntroFormatted}"
+                                               Foreground="#00CC44"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               Margin="4,0"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Header="{i18n:Tr pb.hdr.duration}" Width="80" SortMemberPath="DurationMs">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="vm:BuilderLibraryItemViewModel">
+                                    <TextBlock Text="{Binding DurationFormatted}"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               Margin="4,0"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Header="BPM" Width="60" SortMemberPath="Bpm">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="vm:BuilderLibraryItemViewModel">
+                                    <TextBlock Text="{Binding BpmFormatted}"
+                                               Foreground="#9999CC"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               Margin="4,0"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                    </DataGrid.Columns>
+
+                </DataGrid>
+
+                <!-- Bottom transport bar -->
+                <Border Grid.Row="2" Background="#0D0D1A" Padding="4,3"
+                        BorderThickness="0,1,0,0" BorderBrush="#1C1C2E">
+                    <Grid RowDefinitions="Auto,Auto">
+                        <!-- Row 0: PFL controls (left) | pagination (center) | add button (right) -->
+                        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto">
+                            <!-- Left: PFL transport -->
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="2">
+                                <Button Content="■" Width="24" Height="20" Padding="0" FontSize="11"
+                                        Background="Transparent" Foreground="#FF5555"
+                                        Command="{Binding StopPflCommand}"
+                                        HorizontalContentAlignment="Center"
+                                        ToolTip.Tip="{i18n:Tr tm.tip.pfl_stop}"/>
+                                <Button Content="▶" Width="24" Height="20" Padding="0" FontSize="11"
+                                        Background="Transparent" Foreground="#44DD44"
+                                        Command="{Binding PlayPflCommand}"
+                                        HorizontalContentAlignment="Center"
+                                        ToolTip.Tip="{i18n:Tr pb.tip.pfl_play}"/>
+                                <Button Content="◀◀" Width="28" Height="20" Padding="0" FontSize="10"
+                                        Background="Transparent"
+                                        Command="{Binding SeekBackwardCommand}"
+                                        HorizontalContentAlignment="Center"
+                                        ToolTip.Tip="{i18n:Tr pb.tip.seek_back}"/>
+                                <Button Content="▶▶" Width="28" Height="20" Padding="0" FontSize="10"
+                                        Background="Transparent"
+                                        Command="{Binding SeekForwardCommand}"
+                                        HorizontalContentAlignment="Center"
+                                        ToolTip.Tip="{i18n:Tr pb.tip.seek_fwd}"/>
+                            </StackPanel>
+                            <!-- Center: pagination -->
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2"
+                                        HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <Button Content="◀" Width="20" Height="20" Padding="0" FontSize="10"
+                                        Background="Transparent"
+                                        Command="{Binding PreviousPageCommand}"
+                                        HorizontalContentAlignment="Center"
+                                        ToolTip.Tip="{i18n:Tr library.tip.prev_page}"/>
+                                <TextBlock Text="{Binding PaginationText}"
+                                           FontSize="10" Foreground="Gray"
+                                           VerticalAlignment="Center" Margin="4,0"/>
+                                <Button Content="▶" Width="20" Height="20" Padding="0" FontSize="10"
+                                        Background="Transparent"
+                                        Command="{Binding NextPageCommand}"
+                                        HorizontalContentAlignment="Center"
+                                        ToolTip.Tip="{i18n:Tr library.tip.next_page}"/>
+                            </StackPanel>
+                            <!-- Right: add to playlist -->
+                            <Button Grid.Column="2" Content="+" Width="26" Height="20" Padding="0" FontSize="13"
+                                    Background="Transparent" Foreground="#44AA44"
+                                    Command="{Binding AddSelectedToBuilderCommand}"
+                                    IsEnabled="{Binding SelectedLibraryItem, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                    HorizontalContentAlignment="Center"
+                                    ToolTip.Tip="{i18n:Tr pb.tip.add}"/>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+            </Grid>
+
+            <!-- Separator -->
+            <Border Grid.Column="1" Background="#1C1C2E"/>
+
+            <!-- ── RIGHT: Playlist ───────────────────────────────────────────────── -->
+            <Grid Grid.Column="2" RowDefinitions="Auto,*,Auto" Background="#0F0F1A">
+
+                <!-- Column headers -->
+                <Border Grid.Row="0" Background="#131320"
+                        BorderThickness="0,0,0,1" BorderBrush="#1C1C2E">
+                    <Grid ColumnDefinitions="28,60,96,*,52,62,50,52,22,24"
+                          Margin="0,0,18,0">
+                        <TextBlock Grid.Column="0" Text="#"
+                                   FontSize="10" FontWeight="SemiBold" Foreground="#6666AA"
+                                   Margin="4,4" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Column="1" Text="{i18n:Tr pb.hdr.time}"
+                                   FontSize="10" FontWeight="SemiBold" Foreground="#6666AA"
+                                   Margin="4,4"/>
+                        <TextBlock Grid.Column="2" Text="{i18n:Tr pb.hdr.artist}"
+                                   FontSize="10" FontWeight="SemiBold" Foreground="#6666AA"
+                                   Margin="4,4"/>
+                        <TextBlock Grid.Column="3" Text="{i18n:Tr pb.hdr.title}"
+                                   FontSize="10" FontWeight="SemiBold" Foreground="#6666AA"
+                                   Margin="4,4"/>
+                        <TextBlock Grid.Column="4" Text="INTRO"
+                                   FontSize="10" FontWeight="SemiBold" Foreground="#6666AA"
+                                   Margin="4,4" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Column="5" Text="{i18n:Tr pb.hdr.duration}"
+                                   FontSize="10" FontWeight="SemiBold" Foreground="#6666AA"
+                                   Margin="4,4" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Column="6" Text="SWEEPER"
+                                   FontSize="9" FontWeight="SemiBold" Foreground="#6666AA"
+                                   Margin="4,4" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Column="7" Text="TRIGGER"
+                                   FontSize="9" FontWeight="SemiBold" Foreground="#6666AA"
+                                   Margin="4,4" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Column="8" Text="VT"
+                                   FontSize="9" FontWeight="SemiBold" Foreground="#6666AA"
+                                   Margin="2,4" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Column="9" Text="CUE"
+                                   FontSize="9" FontWeight="SemiBold" Foreground="#6666AA"
+                                   Margin="2,4" HorizontalAlignment="Center"/>
+                    </Grid>
+                </Border>
+
+                <!-- Playlist items -->
+                <ListBox Grid.Row="1" x:Name="BuilderList"
+                         ItemsSource="{Binding BuilderItems}"
+                         SelectedItem="{Binding SelectedBuilderItem}"
+                         SelectionMode="Multiple,Toggle"
+                         SelectionChanged="OnBuilderSelectionChanged"
+                         Background="#0F0F1A"
+                         Padding="0,0,10,0"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+
+                    <ListBox.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="{i18n:Tr pb.ctx.move_up}"
+                                      Command="{Binding #Root.DataContext.MoveItemUpCommand}"/>
+                            <MenuItem Header="{i18n:Tr pb.ctx.move_down}"
+                                      Command="{Binding #Root.DataContext.MoveItemDownCommand}"/>
+                            <Separator/>
+                            <MenuItem Header="{i18n:Tr playlist.ctx.edit_segue}"
+                                      Command="{Binding #Root.DataContext.EditSegueCommand}"/>
+                            <Separator/>
+                            <MenuItem Header="{i18n:Tr playlist.ctx.remove}"
+                                      Command="{Binding #Root.DataContext.RemoveSelectedItemCommand}"/>
+                        </ContextMenu>
+                    </ListBox.ContextMenu>
+
+                    <ListBox.Styles>
+                        <Style Selector="ListBoxItem">
+                            <Setter Property="Padding"   Value="0"/>
+                            <Setter Property="MinHeight" Value="24"/>
+                            <Setter Property="Margin"    Value="0"/>
+                        </Style>
+                        <Style Selector="ListBoxItem:nth-child(odd)">
+                            <Setter Property="Background" Value="#0F0F1A"/>
+                        </Style>
+                        <Style Selector="ListBoxItem:nth-child(even)">
+                            <Setter Property="Background" Value="#141428"/>
+                        </Style>
+                        <!-- Scrollbar width/expansion is handled globally in App.axaml.
+                             The local Width/MaxWidth override that used to live here never
+                             worked: Fluent expands via the thumb's RenderTransform, not width. -->
+                    </ListBox.Styles>
+
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="vm:BuilderItemViewModel">
+                            <Border BorderThickness="0,0,0,1" BorderBrush="#161626">
+                            <Grid ColumnDefinitions="28,60,96,*,52,62,50,52,22,24"
+                                  MinHeight="24" VerticalAlignment="Center"
+                                  Background="Transparent">
+
+                                <TextBlock Grid.Column="0"
+                                           Text="{Binding DisplayPosition}"
+                                           FontSize="12" Foreground="Gray"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
+
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding TimeAtPosition}"
+                                           FontSize="12" Margin="4,0"
+                                           VerticalAlignment="Center"
+                                           Foreground="#6688BB"/>
+
+                                <TextBlock Grid.Column="2"
+                                           Text="{Binding Artist}"
+                                           FontSize="12" Margin="4,0"
+                                           VerticalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis"
+                                           Foreground="LightGray"/>
+
+                                <TextBlock Grid.Column="3"
+                                           Text="{Binding Title}"
+                                           FontSize="12" FontWeight="SemiBold"
+                                           Margin="4,0" VerticalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis"
+                                           Foreground="{Binding TypeColor}"/>
+
+                                <TextBlock Grid.Column="4"
+                                           Text="{Binding IntroFormatted}"
+                                           FontSize="12" Margin="4,0"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Right"
+                                           Foreground="Gray"/>
+
+                                <TextBlock Grid.Column="5"
+                                           Text="{Binding DurationFormatted}"
+                                           FontSize="12" Margin="4,0"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Right"
+                                           Foreground="Gray"/>
+
+                                <!-- SWEEPER, TRIGGER, VT — placeholders -->
+                                <TextBlock Grid.Column="6" FontSize="12" Margin="4,0" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="7" FontSize="12" Margin="4,0" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="8" FontSize="12" Margin="2,0" VerticalAlignment="Center"/>
+
+                                <!-- CUE info icon -->
+                                <TextBlock Grid.Column="9"
+                                           Text="ⓘ"
+                                           FontSize="11" Margin="2,0"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Foreground="#4AB5FF"/>
+                            </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+
+                </ListBox>
+
+                <!-- Drop indicator overlay (no hit-test) -->
+                <Canvas Grid.Row="1" x:Name="DropCanvas" IsHitTestVisible="False">
+                    <Rectangle x:Name="DropLine"
+                               Height="2" Fill="#4AB5FF"
+                               IsVisible="False"
+                               Canvas.Left="0" Canvas.Top="0"/>
+                </Canvas>
+
+                <!-- Bottom bar: TOTAL + cue buttons -->
+                <Border Grid.Row="2" Background="#0A0A14" Padding="4,4"
+                        BorderThickness="0,1,0,0" BorderBrush="#1C1C2E">
+                    <Grid RowDefinitions="Auto,Auto">
+
+                        <!-- Row 0: TOTAL duration + close -->
+                        <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto">
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding TotalDurationText}"
+                                       FontSize="11" Foreground="#6666AA"
+                                       VerticalAlignment="Center" Margin="8,0"/>
+                            <Button Grid.Column="2"
+                                    Content="✕" Width="28" Height="22" Padding="0" FontSize="11"
+                                    Background="Transparent" Foreground="#FF6B6B"
+                                    HorizontalContentAlignment="Center"
+                                    Click="OnCloseClicked"
+                                    ToolTip.Tip="{i18n:Tr common.close}"/>
+                        </Grid>
+
+                        <!-- Row 1: Cue buttons -->
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="3" Margin="0,4,0,0">
+                            <Button Content="—" Width="28" Height="22" Padding="0" FontSize="13"
+                                    Background="#2A1010" Foreground="#FF6B6B"
+                                    Command="{Binding RemoveSelectedItemCommand}"
+                                    IsEnabled="{Binding SelectedBuilderItem, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                    HorizontalContentAlignment="Center"
+                                    ToolTip.Tip="{i18n:Tr playlist.ctx.remove}"/>
+                            <Button Content="START" Height="22" Padding="8,0" FontSize="10"
+                                    Background="#1E1E30" Foreground="White"
+                                    Command="{Binding SetStartCueCommand}"
+                                    IsEnabled="{Binding SelectedBuilderItem, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                            <Button Content="INTRO" Height="22" Padding="8,0" FontSize="10"
+                                    Background="#1A3020" Foreground="#44CC44"
+                                    Command="{Binding SetIntroCueCommand}"
+                                    IsEnabled="{Binding SelectedBuilderItem, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                            <Button Content="END" Height="22" Padding="8,0" FontSize="10"
+                                    Background="#1E1E30" Foreground="White"
+                                    Command="{Binding SetEndCueCommand}"
+                                    IsEnabled="{Binding SelectedBuilderItem, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                        </StackPanel>
+
+                    </Grid>
+                </Border>
+
+            </Grid>
+
+        </Grid>
+
+    </DockPanel>
+
+</Window>

@@ -1,0 +1,4 @@
+<Project>
+  <!-- Nakłada wspólną wersję produktu (version.props) na KAŻDY projekt w repo. -->
+  <Import Project="$(MSBuildThisFileDirectory)version.props" />
+</Project>

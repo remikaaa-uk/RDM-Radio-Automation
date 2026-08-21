@@ -1,0 +1,529 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RDM.UI.ViewModels"
+        xmlns:ctrl="using:RDM.UI.Controls"
+        xmlns:i18n="using:RDM.UI.Localization"
+        x:Class="RDM.UI.Views.TrackEditorWindow"
+        Icon="avares://RDM/Assets/rdm.ico"
+        x:DataType="vm:TrackEditorViewModel"
+        Title="Track Editor"
+        Width="820" Height="640"
+        WindowStartupLocation="CenterOwner"
+        CanResize="True"
+        MinWidth="600" MinHeight="500">
+
+    <Grid RowDefinitions="*,Auto">
+
+        <!-- ═══ Tabs ═══════════════════════════════════════════════════════════ -->
+        <TabControl Grid.Row="0" x:Name="MainTabControl">
+            <TabControl.Styles>
+                <Style Selector="TabItem">
+                    <Setter Property="FontSize" Value="12"/>
+                    <Setter Property="Padding" Value="10,5"/>
+                </Style>
+            </TabControl.Styles>
+
+            <!-- ── Settings tab ──────────────────────────────────────────────── -->
+            <TabItem Header="{i18n:Tr te.tab.settings}">
+                <ScrollViewer>
+                    <StackPanel Margin="12" Spacing="8">
+
+                        <!-- File path (hidden for streams) -->
+                        <StackPanel Spacing="4" IsVisible="{Binding IsRegularAsset}">
+                            <TextBlock Text="{i18n:Tr te.file_location}" FontSize="11" Foreground="Gray"/>
+                            <TextBox Text="{Binding FilePath}"
+                                     IsReadOnly="True"
+                                     Background="#1A1A2E"
+                                     Foreground="#8888AA"
+                                     FontFamily="Consolas,Monospace"
+                                     FontSize="11"
+                                     TextAlignment="Left"
+                                     VerticalContentAlignment="Center"
+                                     Padding="6,4"/>
+                        </StackPanel>
+
+                        <!-- Stream URL (shown only for internet streams) -->
+                        <StackPanel Spacing="4" IsVisible="{Binding IsInternetStream}">
+                            <TextBlock Text="{i18n:Tr te.stream_url}" FontSize="11" Foreground="Gray"/>
+                            <TextBox Text="{Binding StreamUrl}"
+                                     IsReadOnly="True"
+                                     Background="#1A1A2E"
+                                     Foreground="#4AB5FF"
+                                     FontFamily="Consolas,Monospace"
+                                     FontSize="11"
+                                     TextAlignment="Left"
+                                     VerticalContentAlignment="Center"
+                                     Padding="6,4"/>
+                        </StackPanel>
+
+                        <!-- Metadata row 1 -->
+                        <Grid ColumnDefinitions="*,*">
+                            <StackPanel Grid.Column="0" Margin="0,0,6,0" Spacing="4">
+                                <TextBlock Text="{i18n:Tr library.col.artist}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding Artist}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Spacing="4">
+                                <TextBlock Text="{i18n:Tr library.col.title}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding Title}" />
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Metadata row 2 -->
+                        <Grid ColumnDefinitions="*,*,Auto,Auto,Auto">
+                            <StackPanel Grid.Column="0" Margin="0,0,6,0" Spacing="4">
+                                <TextBlock Text="{i18n:Tr te.category_format}" FontSize="11" Foreground="Gray"/>
+                                <ComboBox ItemsSource="{Binding Formats}"
+                                          SelectedItem="{Binding SelectedFormat}"
+                                          DisplayMemberBinding="{Binding Name}"
+                                          HorizontalAlignment="Stretch" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="0,0,6,0" Spacing="4">
+                                <TextBlock Text="{i18n:Tr tm.col.subcategory}" FontSize="11" Foreground="Gray"/>
+                                <ComboBox ItemsSource="{Binding Subcategories}"
+                                          SelectedItem="{Binding SelectedSubcategory}"
+                                          PlaceholderText="{i18n:Tr te.none}"
+                                          HorizontalAlignment="Stretch">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Name}" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Margin="0,0,6,0" Width="80" Spacing="4"
+                                        IsVisible="{Binding IsRegularAsset}">
+                                <TextBlock Text="BPM" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding Bpm}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="3" Margin="0,0,6,0" Width="70" Spacing="4">
+                                <TextBlock Text="{i18n:Tr tm.col.year}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding Year}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="4" Width="70" Spacing="4">
+                                <TextBlock Text="{i18n:Tr tm.col.rating}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding Rating}" />
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Genre + AssetId -->
+                        <Grid ColumnDefinitions="*,6,*">
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="{i18n:Tr tm.col.genre}" FontSize="11" Foreground="Gray"/>
+                                <ComboBox ItemsSource="{Binding Genres}"
+                                          SelectedItem="{Binding SelectedGenre}"
+                                          PlaceholderText="{i18n:Tr te.none}"
+                                          HorizontalAlignment="Stretch" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Spacing="4">
+                                <TextBlock Text="{i18n:Tr te.asset_id}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding AssetId}"
+                                         IsReadOnly="True"
+                                         Background="#1A1A2E"
+                                         Foreground="#8888AA"
+                                         FontFamily="Consolas,Monospace"
+                                         FontSize="11"
+                                         TextAlignment="Left"
+                                         VerticalContentAlignment="Center"
+                                         Padding="6,4"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Status + AssetType -->
+                        <Grid ColumnDefinitions="*,Auto,*,*">
+                            <StackPanel Grid.Column="0" Margin="0,0,6,0" Spacing="4">
+                                <TextBlock Text="Status" FontSize="11" Foreground="Gray"/>
+                                <ComboBox ItemsSource="{Binding StatusOptions}"
+                                          SelectedItem="{Binding Status}"
+                                          HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="0,0,6,0" Width="110" Spacing="4">
+                                <TextBlock Text="{i18n:Tr te.file_type}" FontSize="11" Foreground="Gray"/>
+                                <ComboBox ItemsSource="{Binding AssetTypeOptions}"
+                                          SelectedItem="{Binding SelectedAssetType}"
+                                          HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Margin="0,0,6,0" Spacing="4">
+                                <TextBlock Text="{i18n:Tr te.date_start}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding StartDate, StringFormat='{}{0:yyyy-MM-dd}'}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="3" Spacing="4">
+                                <TextBlock Text="{i18n:Tr te.date_end}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding EndDate, StringFormat='{}{0:yyyy-MM-dd}'}" />
+                            </StackPanel>
+                        </Grid>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ── Details tab ───────────────────────────────────────────────── -->
+            <TabItem Header="{i18n:Tr te.tab.details}">
+                <ScrollViewer>
+                    <StackPanel Margin="12" Spacing="8">
+                        <Grid ColumnDefinitions="*,*">
+                            <StackPanel Grid.Column="0" Margin="0,0,6,0" Spacing="6">
+                                <TextBlock Text="Album" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding Album}" />
+                                <TextBlock Text="{i18n:Tr tm.col.mood}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding Mood}" />
+                                <TextBlock Text="{i18n:Tr te.singer_gender}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding Gender}" />
+                                <TextBlock Text="{i18n:Tr tm.col.language}" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding Language}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Spacing="6">
+                                <TextBlock Text="Loudness (LUFS)" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding LoudnessLufs, StringFormat='{}{0:F1}'}"
+                                         IsReadOnly="True" Background="#1A1A2E" />
+                                <TextBlock Text="True Peak (dBTP)" FontSize="11" Foreground="Gray"/>
+                                <TextBox Text="{Binding LoudnessPeak, StringFormat='{}{0:F1}'}"
+                                         IsReadOnly="True" Background="#1A1A2E" />
+                                <Button Content="{i18n:Tr te.analyze_loudness}"
+                                        Command="{Binding AnalyzeLoudnessCommand}"
+                                        Padding="8,6" HorizontalAlignment="Left"
+                                        Margin="0,12,0,0"/>
+                                <CheckBox Content="{i18n:Tr te.variable_duration}"
+                                          IsChecked="{Binding IsVariableDuration}"
+                                          Margin="0,12,0,0" FontSize="11"/>
+                                <TextBlock IsVisible="{Binding IsDamaged}"
+                                           Text="{i18n:Tr te.damaged}"
+                                           Foreground="#FF6B6B" FontSize="11" Margin="0,8,0,0"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ── Comments tab ──────────────────────────────────────────────── -->
+            <TabItem Header="{i18n:Tr te.tab.comments}">
+                <TextBox Text="{Binding Comments}"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         Margin="8"
+                         Watermark="{i18n:Tr te.comments_wm}" />
+            </TabItem>
+
+            <!-- ── Sweepers tab ───────────────────────────────────────────── -->
+            <TabItem Header="{i18n:Tr te.tab.sweepers}">
+                <Grid Margin="20" RowDefinitions="Auto,*">
+                    <TextBlock Grid.Row="0"
+                               Text="{i18n:Tr te.sweepers_title}"
+                               FontSize="14"
+                               FontWeight="Bold"
+                               Margin="0,0,0,8" />
+                    <TextBlock Grid.Row="1"
+                               Text="{i18n:Tr te.sweepers_desc}"
+                               TextWrapping="Wrap"
+                               FontSize="12"
+                               Foreground="LightGray"
+                               LineHeight="18" />
+                </Grid>
+            </TabItem>
+
+            <!-- ── Cue Editor tab ────────────────────────────────────────────────── -->
+            <TabItem Header="Cue Editor" x:Name="CueEditorTab"
+                     IsVisible="{Binding IsRegularAsset}">
+                <Grid RowDefinitions="Auto,Auto,*">
+
+                    <!-- Player controls row -->
+                    <Border Grid.Row="0" Background="#0D0D1A" Padding="8,6"
+                            BorderThickness="0,0,0,1" BorderBrush="#1C1C2E">
+                        <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,*,Auto">
+                            <Button Grid.Column="0" Content="⏮" Width="30" Height="30" Padding="0"
+                                    FontSize="13" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                    Command="{Binding CueEditor.SeekStartCommand}"
+                                    ToolTip.Tip="{i18n:Tr te.tip.to_start}" />
+                            <Button Grid.Column="1" Content="{Binding CueEditor.PlayPauseIcon}"
+                                    Width="30" Height="30" Padding="0" Margin="4,0,0,0"
+                                    FontSize="13" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                    Command="{Binding CueEditor.PlayPauseCommand}"
+                                    Foreground="#5DDC8A" ToolTip.Tip="{i18n:Tr te.tip.play_stop}" />
+                            <Button Grid.Column="2" Content="■"
+                                    Width="30" Height="30" Padding="0" Margin="4,0,0,0"
+                                    FontSize="13" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                    Command="{Binding CueEditor.StopCommand}"
+                                    Foreground="#FF6B6B" ToolTip.Tip="{i18n:Tr te.tip.stop_return}" />
+                            <Button Grid.Column="3" Content="⏪" Width="30" Height="30" Padding="0" Margin="4,0,0,0"
+                                    FontSize="13" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                    Command="{Binding CueEditor.JumpBackCommand}"
+                                    ToolTip.Tip="-100 ms" />
+                            <Button Grid.Column="4" Content="⏩" Width="30" Height="30" Padding="0" Margin="4,0,0,0"
+                                    FontSize="13" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                    Command="{Binding CueEditor.JumpForwardCommand}"
+                                    ToolTip.Tip="+100 ms" />
+
+                            <!-- Position / slider / duration -->
+                            <Grid Grid.Column="5" ColumnDefinitions="75,*,75" Margin="8,0" VerticalAlignment="Center">
+                                <TextBlock Grid.Column="0"
+                                           Text="{Binding CueEditor.PositionFormatted}"
+                                           FontFamily="Consolas" FontSize="13" Foreground="#4AB5FF"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                <Slider Grid.Column="1"
+                                        Minimum="0"
+                                        Maximum="{Binding CueEditor.DurationSec}"
+                                        Value="{Binding CueEditor.PositionSec, Mode=OneWay}"
+                                        IsEnabled="False"
+                                        Margin="4,0" />
+                                <TextBlock Grid.Column="2"
+                                           Text="{Binding CueEditor.DurationFormatted}"
+                                           FontFamily="Consolas" FontSize="13" Foreground="#6F6F85"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Grid>
+
+                            <!-- Save status + auto-calculate -->
+                            <StackPanel Grid.Column="6" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding CueEditor.StatusMessage}"
+                                           FontSize="11" Foreground="#5DDC8A"
+                                           VerticalAlignment="Center" Margin="4,0" />
+                                <Button Content="⚡ Auto" Height="28" Padding="6,0"
+                                        FontSize="10" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                        Command="{Binding CueEditor.AutoCalculateCommand}"
+                                        ToolTip.Tip="{i18n:Tr te.tip.auto}" />
+                                <Button Content="💾" Width="28" Height="28" Padding="0"
+                                        FontSize="12" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                        Command="{Binding CueEditor.SaveCommand}"
+                                        IsVisible="{Binding CueEditor.IsDirty}"
+                                        ToolTip.Tip="{i18n:Tr te.tip.save_markers}" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Waveform -->
+                    <Border Grid.Row="1" Background="#0A0A15" Margin="8,6" CornerRadius="4">
+                        <ctrl:WaveformControl
+                            x:Name="CueWaveform"
+                            Height="80"
+                            Peaks="{Binding CueEditor.WaveformPeaks}"
+                            DurationMs="{Binding CueEditor.DurationMs}"
+                            PositionMs="{Binding CueEditor.PositionMs}"
+                            IntroCueMs="{Binding CueEditor.IntroCueMs}"
+                            OutroCueMs="{Binding CueEditor.OutroCueMs}"
+                            Markers="{Binding CueEditor.WaveformMarkers}" />
+                    </Border>
+
+                    <!-- Marker table -->
+                    <DataGrid Grid.Row="2"
+                              ItemsSource="{Binding CueEditor.MarkerRows}"
+                              SelectedItem="{Binding CueEditor.SelectedRow}"
+                              CanUserSortColumns="False"
+                              CanUserResizeColumns="False"
+                              CanUserReorderColumns="False"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              RowBackground="#0F0F1A"
+                              GridLinesVisibility="None"
+                              Background="#0F0F1A"
+                              HeadersVisibility="Column">
+
+                        <DataGrid.Styles>
+                            <Style Selector="DataGridColumnHeader">
+                                <Setter Property="Background" Value="#131320" />
+                                <Setter Property="Foreground" Value="#6666AA" />
+                                <Setter Property="FontSize" Value="10" />
+                                <Setter Property="FontWeight" Value="SemiBold" />
+                                <Setter Property="Padding" Value="4,3" />
+                                <Setter Property="MinHeight" Value="22" />
+                                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                <Setter Property="BorderThickness" Value="0,0,0,1" />
+                                <Setter Property="BorderBrush" Value="#1C1C2E" />
+                            </Style>
+                            <Style Selector="DataGridRow">
+                                <Setter Property="Background" Value="#0F0F1A" />
+                                <Setter Property="Foreground" Value="LightGray" />
+                                <Setter Property="FontSize" Value="11" />
+                                <Setter Property="MinHeight" Value="26" />
+                            </Style>
+                            <Style Selector="DataGridRow:nth-child(2n)">
+                                <Setter Property="Background" Value="#141420" />
+                            </Style>
+                            <Style Selector="DataGridCell">
+                                <Setter Property="Padding" Value="4,2" />
+                                <Setter Property="BorderThickness" Value="0" />
+                            </Style>
+                            <Style Selector="DataGridRow:selected DataGridCell">
+                                <Setter Property="Background" Value="#22336688" />
+                            </Style>
+                        </DataGrid.Styles>
+
+                        <DataGrid.Columns>
+
+                            <!-- Marker name + color indicator -->
+                            <DataGridTemplateColumn Header="Marker" Width="95">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="vm:CueMarkerRowViewModel">
+                                        <StackPanel Orientation="Horizontal" Spacing="5" Margin="6,0" VerticalAlignment="Center">
+                                            <Border Width="8" Height="8" CornerRadius="2"
+                                                    Background="{Binding ColorBrush}"
+                                                    VerticalAlignment="Center" />
+                                            <TextBlock Text="{Binding Name}"
+                                                       FontSize="11" FontWeight="SemiBold"
+                                                       VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- Time value -->
+                            <DataGridTemplateColumn Header="{i18n:Tr te.col.time}" Width="85">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="vm:CueMarkerRowViewModel">
+                                        <TextBlock Text="{Binding TimeText}"
+                                                   FontFamily="Consolas" FontSize="11"
+                                                   Foreground="{Binding ColorBrush}"
+                                                   Margin="6,0" VerticalAlignment="Center" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- Action buttons -->
+                            <DataGridTemplateColumn Header="{i18n:Tr te.col.actions}" Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="vm:CueMarkerRowViewModel">
+                                        <StackPanel Orientation="Horizontal" Spacing="4" Margin="4,2" VerticalAlignment="Center">
+                                            <Button Content="{i18n:Tr te.btn.set}"
+                                                    Command="{Binding SetCommand}"
+                                                    Padding="8,2" FontSize="10"
+                                                    ToolTip.Tip="{i18n:Tr te.tip.set}" />
+                                            <Button Content="◀ -10ms"
+                                                    Command="{Binding NudgeBackCommand}"
+                                                    Padding="6,2" FontSize="10"
+                                                    IsEnabled="{Binding HasValue}"
+                                                    ToolTip.Tip="{i18n:Tr te.tip.nudge_back}" />
+                                            <Button Content="+10ms ▶"
+                                                    Command="{Binding NudgeForwardCommand}"
+                                                    Padding="6,2" FontSize="10"
+                                                    IsEnabled="{Binding HasValue}"
+                                                    ToolTip.Tip="{i18n:Tr te.tip.nudge_fwd}" />
+                                            <Button Content="{i18n:Tr te.btn.jump}"
+                                                    Command="{Binding JumpCommand}"
+                                                    Padding="8,2" FontSize="10"
+                                                    ToolTip.Tip="{i18n:Tr te.tip.jump}" />
+                                            <Button Content="{i18n:Tr te.btn.preview}"
+                                                    Command="{Binding PreviewCommand}"
+                                                    Padding="8,2" FontSize="10"
+                                                    ToolTip.Tip="{i18n:Tr te.tip.preview}" />
+                                            <Button Content="✕"
+                                                    Command="{Binding ClearCommand}"
+                                                    Padding="6,2" FontSize="10"
+                                                    Foreground="#FF6B6B"
+                                                    IsEnabled="{Binding HasValue}"
+                                                    ToolTip.Tip="{i18n:Tr te.tip.delete_marker}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                </Grid>
+            </TabItem>
+
+            <!-- ── Image/Cover Art tab ───────────────────────────────────────────── -->
+            <TabItem Header="{i18n:Tr te.tab.image}">
+                <Grid RowDefinitions="*,Auto" Margin="20">
+                    <Border Grid.Row="0"
+                            Background="#11111C"
+                            BorderThickness="1"
+                            BorderBrush="#202030"
+                            CornerRadius="6"
+                            Width="260"
+                            Height="260"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            ClipToBounds="True">
+                        <Grid>
+                            <!-- Default icon when no cover is present -->
+                            <Path Data="M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Zm0,14.5A4.5,4.5,0,1,1,16.5,12,4.5,4.5,0,0,1,12,16.5Zm0-6A1.5,1.5,0,1,0,13.5,12,1.5,1.5,0,0,0,12,10.5Z"
+                                  Fill="#4AB5FF"
+                                  Opacity="0.15"
+                                  Width="120"
+                                  Height="120"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"
+                                  Stretch="Uniform"
+                                  IsVisible="{Binding CoverImage, Converter={x:Static ObjectConverters.IsNull}}" />
+                            
+                            <!-- Cover Art Image -->
+                            <Image Source="{Binding CoverImage}"
+                                   Stretch="UniformToFill"
+                                   IsVisible="{Binding CoverImage, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                        </Grid>
+                    </Border>
+                    <TextBlock Grid.Row="1"
+                               Text="{Binding ImagePath}"
+                               FontSize="11"
+                               Foreground="Gray"
+                               HorizontalAlignment="Center"
+                               Margin="0,12,0,0"
+                               TextWrapping="Wrap" />
+                </Grid>
+            </TabItem>
+
+        </TabControl>
+
+        <!-- ═══ Bottom bar ══════════════════════════════════════════════════════ -->
+        <Border Grid.Row="1" Background="#0D0D1A" Padding="8,6">
+        <!-- Equal star columns on both sides keep the track label exactly centred, whatever the
+             status message or button widths do. -->
+        <Grid ColumnDefinitions="*,Auto,*">
+
+            <!-- Nav + Status -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                <Button Content="←"
+                        Command="{Binding PreviousTrackCommand}"
+                        Width="28" Height="28" Padding="0"
+                        FontSize="13"
+                        IsVisible="{Binding HasNavigation}"
+                        ToolTip.Tip="{i18n:Tr te.tip.prev_track}" />
+                <TextBlock Text="{Binding NavLabel}"
+                           IsVisible="{Binding HasNavigation}"
+                           VerticalAlignment="Center"
+                           FontSize="11" Foreground="Gray"
+                           MinWidth="44" TextAlignment="Center" />
+                <Button Content="→"
+                        Command="{Binding NextTrackCommand}"
+                        Width="28" Height="28" Padding="0"
+                        FontSize="13"
+                        IsVisible="{Binding HasNavigation}"
+                        ToolTip.Tip="{i18n:Tr main.tip.next}" />
+                <TextBlock Text="{Binding StatusMessage}"
+                           VerticalAlignment="Center"
+                           FontSize="11"
+                           Foreground="Gray"
+                           Margin="8,0,0,0" />
+            </StackPanel>
+
+            <!-- Edited track (artist – title), visible on every tab -->
+            <TextBlock Grid.Column="1"
+                       Text="{Binding TrackLabel}"
+                       ToolTip.Tip="{Binding TrackLabel}"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       FontSize="12"
+                       Foreground="#C8C8DC"
+                       TextTrimming="CharacterEllipsis"
+                       MaxWidth="240"
+                       Margin="8,0" />
+
+            <!-- Action buttons -->
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6"
+                        HorizontalAlignment="Right">
+                <TextBlock Text="{i18n:Tr te.unsaved_changes}"
+                           IsVisible="{Binding HasUnsavedChanges}"
+                           Foreground="#FF9800" FontSize="11"
+                           VerticalAlignment="Center" />
+                <Button Content="{i18n:Tr settings.save}"
+                        Command="{Binding SaveCommand}"
+                        Padding="12,6" Background="#204020" Foreground="White"/>
+                <Button Content="{i18n:Tr common.cancel}"
+                        Padding="12,6"
+                        x:Name="CancelButton" />
+            </StackPanel>
+
+        </Grid>
+        </Border>
+
+    </Grid>
+
+</Window>

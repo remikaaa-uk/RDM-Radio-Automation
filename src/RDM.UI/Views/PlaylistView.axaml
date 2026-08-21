@@ -1,0 +1,305 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RDM.UI.ViewModels"
+             xmlns:i18n="using:RDM.UI.Localization"
+             x:Class="RDM.UI.Views.PlaylistView"
+             x:DataType="vm:PlaylistViewModel">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- ═══════════════════════════════════════════════════════════════════
+             Row 0: Mode selector + status
+             ═══════════════════════════════════════════════════════════════════ -->
+        <Grid Grid.Row="0"
+              ColumnDefinitions="Auto,Auto,Auto,*,Auto"
+              Background="#0D0D1A"
+              Margin="0,0,0,2">
+
+            <Grid.Styles>
+                <Style Selector="Button.active">
+                    <Setter Property="Background"   Value="#8B1A1A" />
+                    <Setter Property="Foreground"   Value="White" />
+                    <Setter Property="BorderBrush"  Value="#CC3333" />
+                    <Setter Property="BorderThickness" Value="1" />
+                </Style>
+                <Style Selector="Button.active:pointerover /template/ ContentPresenter">
+                    <Setter Property="Background" Value="#A52020" />
+                </Style>
+                <Style Selector="Button.mic-active">
+                    <Setter Property="Background"      Value="#8B1A1A" />
+                    <Setter Property="Foreground"      Value="White" />
+                    <Setter Property="BorderBrush"     Value="#CC3333" />
+                    <Setter Property="BorderThickness" Value="1" />
+                </Style>
+                <Style Selector="Button.mic-active:pointerover /template/ ContentPresenter">
+                    <Setter Property="Background" Value="#A52020" />
+                </Style>
+            </Grid.Styles>
+
+            <Button Grid.Column="0" Content="AUTO"
+                    Command="{Binding SetModeAutoCommand}"
+                    Classes.active="{Binding IsAutoMode}"
+                    MinWidth="80" Padding="8,6" />
+
+            <Button Grid.Column="1" Content="LIVE ASSIST"
+                    Command="{Binding SetModeAssistCommand}"
+                    Classes.active="{Binding IsAssistMode}"
+                    MinWidth="100" Padding="8,6" />
+
+            <Button Grid.Column="2" Content="MANUAL"
+                    Command="{Binding SetModeManualCommand}"
+                    Classes.active="{Binding IsManualMode}"
+                    MinWidth="80" Padding="8,6" />
+
+            <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0" Spacing="8">
+                <TextBlock Text="{i18n:Tr common.loading}" IsVisible="{Binding IsBusy}" Foreground="Gray" FontSize="11" VerticalAlignment="Center"/>
+                <Button Content="{i18n:Tr playlist.clear_cursor}"
+                        Command="{Binding ClearCursorCommand}"
+                        IsVisible="{Binding IsCursorActive}"
+                        Padding="6,2" FontSize="10"
+                        Background="#553300" Foreground="#FF8C00"
+                        CornerRadius="3"
+                        ToolTip.Tip="{i18n:Tr playlist.tip.clear_cursor}" />
+            </StackPanel>
+
+            <Button Grid.Column="4" Content="🎙 MIC"
+                    Command="{Binding ToggleMicCommand}"
+                    Classes.mic-active="{Binding IsMicActive}"
+                    MinWidth="70" Padding="8,6"
+                    ToolTip.Tip="{i18n:Tr playlist.tip.mic}" />
+
+        </Grid>
+
+        <!-- ═══════════════════════════════════════════════════════════════════
+             Row 1: Playlist list + overlays
+             ═══════════════════════════════════════════════════════════════════ -->
+        <Grid Grid.Row="1">
+
+            <ListBox x:Name="PlaylistListBox"
+                     ItemsSource="{Binding Items}"
+                     SelectedItem="{Binding SelectedItem}"
+                     DragDrop.AllowDrop="True"
+                     Background="#0F0F1A"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     DragDrop.DragOver="OnDragOver"
+                     DragDrop.Drop="OnDrop"
+                     DragDrop.DragLeave="OnDragLeave">
+
+                <ListBox.Styles>
+                    <Style Selector="ListBoxItem">
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="Margin"  Value="0,0,0,0" />
+                    </Style>
+                    <Style Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+                        <Setter Property="Background" Value="Transparent" />
+                    </Style>
+                    <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                        <Setter Property="Background" Value="Transparent" />
+                    </Style>
+                    <Style Selector="Button:disabled">
+                        <Setter Property="Opacity"    Value="0.35" />
+                        <Setter Property="Foreground" Value="#606070" />
+                    </Style>
+                </ListBox.Styles>
+
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="vm:PlaylistItemViewModel">
+
+                        <Grid RowDefinitions="Auto,*">
+
+                        <!-- Insert cursor indicator — orange line before this item -->
+                        <Border Grid.Row="0"
+                                Height="3"
+                                Background="#FF8C00"
+                                IsVisible="{Binding IsCursorPosition}"
+                                IsHitTestVisible="False"
+                                Opacity="0.85" />
+
+                        <Grid Grid.Row="1" ColumnDefinitions="8,*" MinHeight="60"
+                              IsVisible="{Binding !IsDamaged}">
+
+                            <!-- Type accent strip -->
+                            <Border Grid.Column="0" Background="{Binding TypeAccentColor}" />
+
+                        <!-- Row Border: pointer handlers here so PointerMoved reaches us
+                             (Border owns the pointer after PointerPressed, not the ListBox) -->
+                        <Border Grid.Column="1"
+                                Background="{Binding RowBackground}"
+                                BorderThickness="0,0,0,1"
+                                BorderBrush="#1A1A2A"
+                                ToolTip.Tip="{Binding Comments}">
+                            <Border.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="{i18n:Tr playlist.ctx.insert_above}" Command="{Binding InsertAboveCommand}" />
+                                    <MenuItem Header="{i18n:Tr playlist.ctx.insert_below}" Command="{Binding InsertBelowCommand}" />
+                                    <MenuItem Header="{i18n:Tr playlist.ctx.set_cursor}"   Command="{Binding SetCursorHereCommand}" />
+                                    <Separator />
+                                    <MenuItem Header="{i18n:Tr playlist.ctx.info}"         Command="{Binding InfoCommand}" />
+                                    <MenuItem Header="{i18n:Tr playlist.ctx.edit_segue}"   Command="{Binding EditSegueCommand}" />
+                                    <MenuItem Header="{i18n:Tr playlist.ctx.remove}"       Command="{Binding RemoveCommand}" />
+                                </ContextMenu>
+                            </Border.ContextMenu>
+
+                            <Grid ColumnDefinitions="76,*,160" VerticalAlignment="Stretch" Background="Transparent">
+                                <Grid.Styles>
+                                    <Style Selector="Grid:pointerover">
+                                        <Setter Property="Background" Value="#1AFFFFFF" />
+                                    </Style>
+                                </Grid.Styles>
+
+                                <!-- ── LEFT: position badge + ETA ──────────── -->
+                                <Grid Grid.Column="0" RowDefinitions="Auto,Auto"
+                                      VerticalAlignment="Center" Margin="6,0">
+
+                                    <!-- Position badge -->
+                                    <Border Grid.Row="0"
+                                            Background="#2C2C58"
+                                            CornerRadius="3"
+                                            Padding="5,2"
+                                            HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding Position}"
+                                                   FontSize="11" FontWeight="Bold"
+                                                   Foreground="#B0B8E0"
+                                                   HorizontalAlignment="Center" />
+                                    </Border>
+
+                                    <!-- ETA — 14px Bold, col widened to 76px to fit HH:mm:ss -->
+                                    <TextBlock Grid.Row="1"
+                                               Text="{Binding ScheduledAtText}"
+                                               FontSize="14" FontWeight="Bold"
+                                               Foreground="{Binding EtaBrush}"
+                                               HorizontalAlignment="Center" />
+                                </Grid>
+
+                                <!-- ── MIDDLE: artist + title ───────────────── -->
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="6,4">
+                                    <TextBlock Text="{Binding Artist}"
+                                               FontSize="11"
+                                               Foreground="#A0A0B0"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding Title}"
+                                               FontSize="14" FontWeight="Bold"
+                                               Foreground="White"
+                                               TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+
+                                <!-- ── RIGHT: action buttons + timing ───────── -->
+                                <!-- Right margin clears the always-visible scrollbar (ScrollBarSize
+                                     = 11 in App.axaml, +2 breathing room). The bar overlays the row
+                                     rather than reserving layout space, so without this it sits on
+                                     top of the remove button and eats the click. -->
+                                <Grid Grid.Column="2" RowDefinitions="Auto,Auto"
+                                      VerticalAlignment="Center" Margin="4,2,13,2">
+
+                                    <!-- Action buttons -->
+                                    <StackPanel Grid.Row="0" Orientation="Horizontal"
+                                                HorizontalAlignment="Right" Spacing="2">
+                                        <Button Content="🎧"
+                                                Command="{Binding PflCommand}"
+                                                IsEnabled="{Binding IsPflAvailable}"
+                                                Width="24" Height="24" Padding="0"
+                                                FontSize="11" Background="Transparent"
+                                                HorizontalContentAlignment="Center"
+                                                ToolTip.Tip="{i18n:Tr playlist.tip.pfl}"
+                                                ToolTip.ShowOnDisabled="True" />
+                                        <Button Content="ℹ"
+                                                Command="{Binding InfoCommand}"
+                                                Width="24" Height="24" Padding="0"
+                                                FontSize="11" Background="Transparent"
+                                                HorizontalContentAlignment="Center"
+                                                ToolTip.Tip="{i18n:Tr playlist.tip.info}" />
+                                        <Button Content="🗑"
+                                                Command="{Binding RemoveCommand}"
+                                                Width="24" Height="24" Padding="0"
+                                                FontSize="11" Background="Transparent"
+                                                HorizontalContentAlignment="Center"
+                                                Foreground="#FF6B6B"
+                                                ToolTip.Tip="{i18n:Tr playlist.ctx.remove}" />
+                                    </StackPanel>
+
+                                    <!-- Timing: color only, no I:/O: prefix text -->
+                                    <StackPanel Grid.Row="1" Orientation="Horizontal"
+                                                HorizontalAlignment="Right" Spacing="4">
+                                        <TextBlock Text="{Binding IntroFormatted}"
+                                                   FontSize="10"
+                                                   Foreground="{DynamicResource PlaylistIntroBrush}"
+                                                   IsVisible="{Binding HasIntro}" />
+                                        <TextBlock Text="{Binding OutroFormatted}"
+                                                   FontSize="10"
+                                                   Foreground="{DynamicResource PlaylistOutroBrush}"
+                                                   IsVisible="{Binding HasOutro}" />
+                                        <TextBlock Text="{Binding DurationFormatted}"
+                                                   FontSize="10"
+                                                   Foreground="#808090" />
+                                    </StackPanel>
+
+                                </Grid>
+                            </Grid>
+                        </Border>
+
+                        </Grid><!-- end inner Grid ColumnDefinitions="8,*" -->
+                        </Grid><!-- end outer Grid RowDefinitions="Auto,*" -->
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+
+            </ListBox>
+
+            <!-- Drag & drop insertion indicator — blue line showing drop position -->
+            <Canvas x:Name="DropCanvas" IsHitTestVisible="False">
+                <Border x:Name="InsertionIndicator"
+                        Height="2"
+                        Background="#4AB5FF"
+                        IsVisible="False"
+                        Canvas.Left="0" />
+            </Canvas>
+
+            <!-- Countdown overlay — not hit-test-visible, renders on top of list -->
+            <TextBlock Text="{Binding Countdown.CountdownSeconds}"
+                       IsVisible="{Binding Countdown.IsCountdownVisible}"
+                       IsHitTestVisible="False"
+                       Foreground="{Binding Countdown.CountdownBrush}"
+                       FontSize="160"
+                       FontWeight="Bold"
+                       Opacity="0.30"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center" />
+
+        </Grid>
+
+        <!-- ═══════════════════════════════════════════════════════════════════
+             Row 2: Load / Save / Clear playlist bar
+             ═══════════════════════════════════════════════════════════════════ -->
+        <Grid Grid.Row="2" ColumnDefinitions="*,*,Auto"
+              Background="#0D0D1A"
+              Margin="0,2,0,0">
+
+            <Button Grid.Column="0"
+                    Content="{i18n:Tr playlist.load}"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center"
+                    Padding="8,6"
+                    Margin="2,2,1,2"
+                    x:Name="LoadPlaylistButton" />
+
+            <Button Grid.Column="1"
+                    Content="{i18n:Tr playlist.save}"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center"
+                    Padding="8,6"
+                    Margin="1,2,1,2"
+                    x:Name="SavePlaylistButton" />
+
+            <Button Grid.Column="2"
+                    Content="{i18n:Tr playlist.clear}"
+                    Foreground="#FF6B6B"
+                    HorizontalContentAlignment="Center"
+                    Padding="10,6"
+                    Margin="0,2,2,2"
+                    x:Name="ClearPlaylistButton"
+                    ToolTip.Tip="{i18n:Tr playlist.tip.clear}" />
+
+        </Grid>
+
+    </Grid>
+
+</UserControl>

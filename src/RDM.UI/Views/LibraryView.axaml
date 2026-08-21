@@ -1,0 +1,343 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RDM.UI.ViewModels"
+             xmlns:dto="using:RDM.Shared.DTOs"
+             xmlns:i18n="using:RDM.UI.Localization"
+             xmlns:ctrl="using:RDM.UI.Controls"
+             x:Class="RDM.UI.Views.LibraryView"
+             x:DataType="vm:LibraryViewModel">
+
+    <DockPanel>
+
+        <!-- ═══ Search ════════════════════════════════════════════════════════ -->
+        <Border DockPanel.Dock="Top" Background="#111122"
+                Padding="4,4,4,2"
+                BorderThickness="0,0,0,1" BorderBrush="#1C1C2E">
+            <TextBox Text="{Binding SearchText}"
+                     Watermark="{i18n:Tr library.search_watermark}"
+                     ctrl:SearchBoxBehavior.ShowClearButton="True"
+                     FontSize="12" />
+        </Border>
+
+        <!-- ═══ Filters ═══════════════════════════════════════════════════════ -->
+        <Border DockPanel.Dock="Top" Background="#111122"
+                Padding="4,2,4,4"
+                BorderThickness="0,0,0,1" BorderBrush="#1C1C2E">
+            <Grid ColumnDefinitions="*,4,*,4,*">
+
+                <!-- Category -->
+                <ComboBox Grid.Column="0"
+                          ItemsSource="{Binding Formats}"
+                          SelectedItem="{Binding SelectedFormat}"
+                          PlaceholderText="{i18n:Tr library.filter.any_category}"
+                          FontSize="11"
+                          HorizontalAlignment="Stretch">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="dto:AssetFormatDto">
+                            <TextBlock Text="{Binding Name}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
+                <!-- Subcategory — populated when a format is selected -->
+                <ComboBox Grid.Column="2"
+                          ItemsSource="{Binding SubcategoryFilters}"
+                          SelectedItem="{Binding SelectedSubcategory}"
+                          PlaceholderText="{i18n:Tr library.filter.any_subcategory}"
+                          FontSize="11"
+                          HorizontalAlignment="Stretch">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="dto:SubcategoryDto">
+                            <TextBlock Text="{Binding Name}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
+                <!-- Genre -->
+                <ComboBox Grid.Column="4"
+                          ItemsSource="{Binding GenreFilters}"
+                          SelectedItem="{Binding SelectedGenre}"
+                          FontSize="11"
+                          HorizontalAlignment="Stretch" />
+
+            </Grid>
+        </Border>
+
+        <!-- ═══ Bottom bar ════════════════════════════════════════════════════ -->
+        <Border DockPanel.Dock="Bottom" Background="#0D0D1A"
+                Padding="6,5"
+                BorderThickness="0,1,0,0" BorderBrush="#1C1C2E">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+
+                <!-- Left: + button + pagination -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal"
+                            Spacing="3" VerticalAlignment="Center">
+
+                    <!-- Add to playlist (end) -->
+                    <Button Command="{Binding AddToPlaylistCommand}"
+                            Width="28" Height="26" Padding="0"
+                            Background="#005500" CornerRadius="3"
+                            ToolTip.Tip="{i18n:Tr library.tip.add_end}">
+                        <TextBlock Text="+" FontSize="16" FontWeight="Bold"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Foreground="White" Margin="0,-2,0,0" />
+                    </Button>
+
+                    <!-- Add as next -->
+                    <Button Command="{Binding AddNextCommand}"
+                            Width="36" Height="26" Padding="0"
+                            Background="#004488" CornerRadius="3"
+                            ToolTip.Tip="{i18n:Tr library.tip.add_next}">
+                        <TextBlock Text="+►" FontSize="11" FontWeight="Bold"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Foreground="White" />
+                    </Button>
+
+                    <Rectangle Width="6" />
+
+                    <!-- First page -->
+                    <Button Command="{Binding FirstPageCommand}"
+                            Width="26" Height="26" Padding="2"
+                            Background="#0D0D2A" CornerRadius="3"
+                            ToolTip.Tip="{i18n:Tr library.tip.first_page}">
+                        <TextBlock Text="|◀" FontSize="9" VerticalAlignment="Center"
+                                   HorizontalAlignment="Center" />
+                    </Button>
+
+                    <!-- Previous page -->
+                    <Button Command="{Binding PreviousPageCommand}"
+                            Width="26" Height="26" Padding="2"
+                            Background="#0D0D2A" CornerRadius="3"
+                            ToolTip.Tip="{i18n:Tr library.tip.prev_page}">
+                        <TextBlock Text="◀" FontSize="10" VerticalAlignment="Center"
+                                   HorizontalAlignment="Center" />
+                    </Button>
+
+                    <!-- Next page -->
+                    <Button Command="{Binding NextPageCommand}"
+                            Width="26" Height="26" Padding="2"
+                            Background="#0D0D2A" CornerRadius="3"
+                            ToolTip.Tip="{i18n:Tr library.tip.next_page}">
+                        <TextBlock Text="▶" FontSize="10" VerticalAlignment="Center"
+                                   HorizontalAlignment="Center" />
+                    </Button>
+
+                    <!-- Last page -->
+                    <Button Command="{Binding LastPageCommand}"
+                            Width="26" Height="26" Padding="2"
+                            Background="#0D0D2A" CornerRadius="3"
+                            ToolTip.Tip="{i18n:Tr library.tip.last_page}">
+                        <TextBlock Text="▶|" FontSize="9" VerticalAlignment="Center"
+                                   HorizontalAlignment="Center" />
+                    </Button>
+
+                </StackPanel>
+
+                <!-- Center: count + loading indicator -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal"
+                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Spacing="8">
+                    <TextBlock Text="{Binding PaginationText}"
+                               FontSize="12" Foreground="#AAAACC"
+                               VerticalAlignment="Center" />
+                    <TextBlock Text="{i18n:Tr common.loading}"
+                               IsVisible="{Binding IsBusy}"
+                               FontSize="11" Foreground="#4AB5FF"
+                               VerticalAlignment="Center" />
+                </StackPanel>
+
+                <!-- Right: PFL transport -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal"
+                            Spacing="3" VerticalAlignment="Center">
+
+                    <!-- Seek -10s -->
+                    <Button Command="{Binding SeekBackwardCommand}"
+                            Width="26" Height="26" Padding="2"
+                            Background="#0D0D2A" CornerRadius="3"
+                            ToolTip.Tip="{i18n:Tr library.tip.seek_back}">
+                        <TextBlock Text="«" FontSize="12" VerticalAlignment="Center"
+                                   HorizontalAlignment="Center" />
+                    </Button>
+
+                    <!-- Play PFL -->
+                    <Button Command="{Binding PlayPflCommand}"
+                            Width="26" Height="26" Padding="2"
+                            Background="#116600" CornerRadius="3"
+                            ToolTip.Tip="{i18n:Tr library.tip.play_pfl}">
+                        <TextBlock Text="▶" FontSize="10" VerticalAlignment="Center"
+                                   HorizontalAlignment="Center" />
+                    </Button>
+
+                    <!-- Stop PFL -->
+                    <Button Command="{Binding StopPflCommand}"
+                            Width="26" Height="26" Padding="2"
+                            Background="#CC2200" CornerRadius="3"
+                            ToolTip.Tip="{i18n:Tr library.tip.stop_pfl}">
+                        <TextBlock Text="■" FontSize="10" VerticalAlignment="Center"
+                                   HorizontalAlignment="Center" />
+                    </Button>
+
+                    <!-- Seek +10s -->
+                    <Button Command="{Binding SeekForwardCommand}"
+                            Width="26" Height="26" Padding="2"
+                            Background="#0D0D2A" CornerRadius="3"
+                            ToolTip.Tip="{i18n:Tr library.tip.seek_fwd}">
+                        <TextBlock Text="»" FontSize="12" VerticalAlignment="Center"
+                                   HorizontalAlignment="Center" />
+                    </Button>
+
+                </StackPanel>
+
+            </Grid>
+        </Border>
+
+        <!-- ═══ DataGrid ══════════════════════════════════════════════════════ -->
+        <DataGrid x:Name="LibraryDataGrid"
+                  ItemsSource="{Binding Items}"
+                  SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+                  CanUserSortColumns="True"
+                  CanUserResizeColumns="True"
+                  CanUserReorderColumns="False"
+                  AutoGenerateColumns="False"
+                  RowBackground="#0F0F1A"
+                  GridLinesVisibility="None"
+                  Background="#0F0F1A"
+                  HeadersVisibility="Column"
+                  Sorting="OnDataGridSorting"
+                  DoubleTapped="OnDataGridDoubleTapped">
+
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="{i18n:Tr library.tip.add_end}"
+                              Command="{Binding AddToPlaylistCommand}" />
+                    <MenuItem Header="{i18n:Tr library.tip.add_next}"
+                              Command="{Binding AddNextCommand}" />
+                    <Separator />
+                    <MenuItem Header="{i18n:Tr library.ctx.edit_track}"
+                              Command="{Binding OpenTrackEditorCommand}" />
+                    <MenuItem Header="{i18n:Tr library.tip.play_pfl}"
+                              Command="{Binding PlayPflCommand}" />
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+
+            <DataGrid.Styles>
+                <Style Selector="DataGridColumnHeader">
+                    <Setter Property="Background" Value="#131320" />
+                    <Setter Property="Foreground" Value="#6666AA" />
+                    <Setter Property="FontSize" Value="10" />
+                    <Setter Property="FontWeight" Value="SemiBold" />
+                    <!-- Small padding so text fits in narrow columns (Duration, BPM) -->
+                    <Setter Property="Padding" Value="4,3" />
+                    <Setter Property="MinHeight" Value="22" />
+                    <Setter Property="HorizontalContentAlignment" Value="Center" />
+                    <Setter Property="BorderThickness" Value="0,0,0,1" />
+                    <Setter Property="BorderBrush" Value="#1C1C2E" />
+                </Style>
+                <Style Selector="DataGridColumnHeader:hover">
+                    <Setter Property="Background" Value="#1C1C2E" />
+                    <Setter Property="Foreground" Value="#9999CC" />
+                </Style>
+                <Style Selector="DataGridRow">
+                    <Setter Property="Background" Value="#0F0F1A" />
+                    <Setter Property="Foreground" Value="LightGray" />
+                    <Setter Property="FontSize" Value="11" />
+                    <Setter Property="MinHeight" Value="24" />
+                </Style>
+                <Style Selector="DataGridRow:nth-child(2n)">
+                    <Setter Property="Background" Value="#141420" />
+                </Style>
+                <Style Selector="DataGridCell">
+                    <Setter Property="Padding" Value="8,3" />
+                    <Setter Property="BorderThickness" Value="0" />
+                    <Setter Property="Foreground" Value="LightGray" />
+                </Style>
+                <Style Selector="DataGridRow:selected DataGridCell">
+                    <Setter Property="Background" Value="#22336688" />
+                    <Setter Property="Foreground" Value="White" />
+                </Style>
+            </DataGrid.Styles>
+
+            <DataGrid.Columns>
+
+                <!-- Type icon (stream = 📡) -->
+                <DataGridTemplateColumn Header="" Width="28" CanUserSort="False">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate x:DataType="vm:LibraryItemViewModel">
+                            <TextBlock Text="{Binding TypeIcon}"
+                                       FontSize="12"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- Artist -->
+                <DataGridTextColumn Header="{i18n:Tr library.col.artist}"
+                                    Binding="{Binding Artist}"
+                                    Width="*"
+                                    SortMemberPath="Artist" />
+
+                <!-- Title -->
+                <DataGridTextColumn Header="{i18n:Tr library.col.title}"
+                                    Binding="{Binding Title}"
+                                    Width="*"
+                                    SortMemberPath="Title" />
+
+                <!-- Intro — green, center -->
+                <DataGridTemplateColumn Header="Intro" Width="90"
+                                        SortMemberPath="IntroMs">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate x:DataType="vm:LibraryItemViewModel">
+                            <TextBlock Text="{Binding IntroFormatted}"
+                                       Foreground="#00CC44"
+                                       FontSize="11"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Margin="4,0" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- Duration — center -->
+                <DataGridTemplateColumn Header="{i18n:Tr library.col.duration}" Width="90"
+                                        SortMemberPath="DurationMs">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate x:DataType="vm:LibraryItemViewModel">
+                            <TextBlock Text="{Binding DurationFormatted}"
+                                       FontSize="11"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Margin="4,0" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- BPM — center -->
+                <DataGridTemplateColumn Header="BPM" Width="70"
+                                        SortMemberPath="Bpm">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate x:DataType="vm:LibraryItemViewModel">
+                            <TextBlock Text="{Binding BpmFormatted}"
+                                       FontSize="11"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Margin="4,0" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- Date Added -->
+                <DataGridTextColumn Header="{i18n:Tr library.col.date_added}"
+                                    Binding="{Binding DateAdded}"
+                                    Width="100"
+                                    SortMemberPath="DateAdded" />
+
+            </DataGrid.Columns>
+
+        </DataGrid>
+
+    </DockPanel>
+
+</UserControl>

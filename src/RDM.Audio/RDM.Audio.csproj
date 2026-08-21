@@ -1,0 +1,82 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <PlatformTarget>x64</PlatformTarget>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RDM.Core\RDM.Core.csproj" />
+    <ProjectReference Include="..\RDM.Shared\RDM.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Bass.Net.dll from https://www.un4seen.com/ — placed in /libs at solution root -->
+    <Reference Include="Bass.Net">
+      <HintPath>..\..\libs\Bass.Net.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Native BASS DLLs — copied to output directory alongside the assembly -->
+    <Content Include="..\..\libs\bass.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>BassLib\bass.dll</Link>
+    </Content>
+    <Content Include="..\..\libs\bassmix.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>BassLib\bassmix.dll</Link>
+    </Content>
+    <Content Include="..\..\libs\basswasapi.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>BassLib\basswasapi.dll</Link>
+    </Content>
+    <Content Include="..\..\libs\bassloud.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>BassLib\bassloud.dll</Link>
+    </Content>
+    <!-- Optional: place bass_fx.dll in /libs to enable BFX effects on the mic chain -->
+    <Content Include="..\..\libs\bass_fx.dll"
+             Condition="Exists('..\..\libs\bass_fx.dll')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>BassLib\bass_fx.dll</Link>
+    </Content>
+    <!-- Optional: place bass_vst.dll in /libs to enable VST 2.x plugin hosting -->
+    <Content Include="..\..\libs\bass_vst.dll"
+             Condition="Exists('..\..\libs\bass_vst.dll')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>BassLib\bass_vst.dll</Link>
+    </Content>
+    <!-- Optional: place bassasio.dll in /libs to enable the ASIO output backend -->
+    <Content Include="..\..\libs\bassasio.dll"
+             Condition="Exists('..\..\libs\bassasio.dll')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>BassLib\bassasio.dll</Link>
+    </Content>
+    <!-- Optional: place bassenc.dll in /libs to enable streaming (SHOUTcast/Icecast).
+         Required by every encoder format; the per-format DLLs below are useless without it. -->
+    <Content Include="..\..\libs\bassenc.dll"
+             Condition="Exists('..\..\libs\bassenc.dll')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>BassLib\bassenc.dll</Link>
+    </Content>
+    <!-- Optional per-format encoders — each one enables that format only. -->
+    <Content Include="..\..\libs\bassenc_mp3.dll"
+             Condition="Exists('..\..\libs\bassenc_mp3.dll')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>BassLib\bassenc_mp3.dll</Link>
+    </Content>
+    <Content Include="..\..\libs\bassenc_ogg.dll"
+             Condition="Exists('..\..\libs\bassenc_ogg.dll')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>BassLib\bassenc_ogg.dll</Link>
+    </Content>
+    <Content Include="..\..\libs\bassenc_opus.dll"
+             Condition="Exists('..\..\libs\bassenc_opus.dll')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>BassLib\bassenc_opus.dll</Link>
+    </Content>
+  </ItemGroup>
+</Project>

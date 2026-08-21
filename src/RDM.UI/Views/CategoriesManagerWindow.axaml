@@ -1,0 +1,239 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RDM.UI.ViewModels"
+        x:Class="RDM.UI.Views.CategoriesManagerWindow"
+        Icon="avares://RDM/Assets/rdm.ico"
+        x:DataType="vm:CategoriesManagerViewModel"
+        Title="Categories Manager"
+        Width="820" Height="520"
+        MinWidth="600" MinHeight="400"
+        WindowStartupLocation="CenterOwner"
+        CanResize="True"
+        Background="#0F0F1A">
+
+    <Window.Styles>
+        <Style Selector="TextBox">
+            <Setter Property="Background"   Value="#0A0A15" />
+            <Setter Property="Foreground"   Value="#CCCCDD" />
+            <Setter Property="BorderBrush"  Value="#2A2A3E" />
+            <Setter Property="Padding"      Value="5,3" />
+            <Setter Property="FontSize"     Value="12" />
+            <Setter Property="CaretBrush"   Value="#AAAACC" />
+        </Style>
+        <Style Selector="Button">
+            <Setter Property="Background" Value="#1C1C2E" />
+            <Setter Property="Foreground" Value="#CCCCDD" />
+            <Setter Property="Padding"    Value="8,4" />
+            <Setter Property="FontSize"   Value="12" />
+        </Style>
+        <Style Selector="Button:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#2A2A40" />
+        </Style>
+        <Style Selector="ListBox">
+            <Setter Property="Background"      Value="#0A0A15" />
+            <Setter Property="Foreground"      Value="#CCCCDD" />
+            <Setter Property="BorderBrush"     Value="#2A2A3E" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding"         Value="0" />
+            <Setter Property="FontSize"        Value="12" />
+        </Style>
+        <Style Selector="ListBoxItem">
+            <Setter Property="Padding"    Value="6,3" />
+            <Setter Property="Margin"     Value="0" />
+            <Setter Property="MinHeight"  Value="22" />
+            <Setter Property="Foreground" Value="#CCCCDD" />
+        </Style>
+        <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+            <Setter Property="Background" Value="#1E3A5F" />
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#131320" Padding="16,12"
+                BorderThickness="0,0,0,1" BorderBrush="#1C1C2E">
+            <TextBlock Text="Categories Manager"
+                       FontSize="20" FontWeight="Bold"
+                       Foreground="White" />
+        </Border>
+
+        <!-- Three columns -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,1,*,1,*" Margin="0">
+
+            <!-- ═══ Categories ════════════════════════════════════════════════ -->
+            <Grid Grid.Column="0" RowDefinitions="Auto,Auto,*,Auto,Auto"
+                  Margin="12,10,10,10">
+
+                <TextBlock Grid.Row="0" Text="Categories"
+                           FontSize="11" Foreground="#888899"
+                           Margin="0,0,0,6" />
+
+                <!-- New name + +/- buttons -->
+                <Grid Grid.Row="1" ColumnDefinitions="*,4,28,4,28" Margin="0,0,0,6">
+                    <TextBox Grid.Column="0"
+                             Text="{Binding NewCategoryName}"
+                             Watermark="New category name…" />
+                    <Button Grid.Column="2"
+                            Content="+"
+                            Command="{Binding AddCategoryCommand}"
+                            IsEnabled="{Binding !IsBusy}"
+                            Padding="0" Width="28" HorizontalContentAlignment="Center"
+                            FontSize="16" FontWeight="Bold" />
+                    <Button Grid.Column="4"
+                            Content="-"
+                            Command="{Binding DeleteCategoryCommand}"
+                            IsEnabled="{Binding !IsBusy}"
+                            Padding="0" Width="28" HorizontalContentAlignment="Center"
+                            FontSize="16" FontWeight="Bold" />
+                </Grid>
+
+                <!-- List -->
+                <ListBox Grid.Row="2"
+                         ItemsSource="{Binding Categories}"
+                         SelectedItem="{Binding SelectedCategory}"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled" />
+
+                <!-- Rename TextBox -->
+                <TextBox Grid.Row="3"
+                         Text="{Binding RenameCategoryText}"
+                         Margin="0,6,0,4"
+                         IsEnabled="{Binding SelectedCategory, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+                <!-- Rename button -->
+                <Button Grid.Row="4"
+                        Content="Rename"
+                        Command="{Binding RenameCategoryCommand}"
+                        IsEnabled="{Binding !IsBusy}"
+                        HorizontalAlignment="Center"
+                        Padding="20,4" />
+
+            </Grid>
+
+            <!-- Separator -->
+            <Rectangle Grid.Column="1" Fill="#1C1C2E" />
+
+            <!-- ═══ Sub Categories ════════════════════════════════════════════ -->
+            <Grid Grid.Column="2" RowDefinitions="Auto,Auto,*,Auto,Auto"
+                  Margin="10,10,10,10">
+
+                <TextBlock Grid.Row="0" Text="Sub Categories"
+                           FontSize="11" Foreground="#888899"
+                           Margin="0,0,0,6" />
+
+                <Grid Grid.Row="1" ColumnDefinitions="*,4,28,4,28" Margin="0,0,0,6">
+                    <TextBox Grid.Column="0"
+                             Text="{Binding NewSubCategoryName}"
+                             Watermark="New sub category name…"
+                             IsEnabled="{Binding SelectedCategory, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                    <Button Grid.Column="2"
+                            Content="+"
+                            Command="{Binding AddSubCategoryCommand}"
+                            IsEnabled="{Binding !IsBusy}"
+                            Padding="0" Width="28" HorizontalContentAlignment="Center"
+                            FontSize="16" FontWeight="Bold" />
+                    <Button Grid.Column="4"
+                            Content="-"
+                            Command="{Binding DeleteSubCategoryCommand}"
+                            IsEnabled="{Binding !IsBusy}"
+                            Padding="0" Width="28" HorizontalContentAlignment="Center"
+                            FontSize="16" FontWeight="Bold" />
+                </Grid>
+
+                <ListBox Grid.Row="2"
+                         ItemsSource="{Binding SubCategories}"
+                         SelectedItem="{Binding SelectedSubCategory}"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled" />
+
+                <TextBox Grid.Row="3"
+                         Text="{Binding RenameSubCategoryText}"
+                         Margin="0,6,0,4"
+                         IsEnabled="{Binding SelectedSubCategory, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+                <Button Grid.Row="4"
+                        Content="Rename"
+                        Command="{Binding RenameSubCategoryCommand}"
+                        IsEnabled="{Binding !IsBusy}"
+                        HorizontalAlignment="Center"
+                        Padding="20,4" />
+
+            </Grid>
+
+            <!-- Separator -->
+            <Rectangle Grid.Column="3" Fill="#1C1C2E" />
+
+            <!-- ═══ Genre ═════════════════════════════════════════════════════ -->
+            <Grid Grid.Column="4" RowDefinitions="Auto,Auto,*,Auto,Auto"
+                  Margin="10,10,12,10">
+
+                <TextBlock Grid.Row="0" Text="Genre"
+                           FontSize="11" Foreground="#888899"
+                           Margin="0,0,0,6" />
+
+                <Grid Grid.Row="1" ColumnDefinitions="*,4,28,4,28" Margin="0,0,0,6">
+                    <TextBox Grid.Column="0"
+                             Text="{Binding NewGenreName}"
+                             Watermark="New genre name…" />
+                    <Button Grid.Column="2"
+                            Content="+"
+                            Command="{Binding AddGenreCommand}"
+                            IsEnabled="{Binding !IsBusy}"
+                            Padding="0" Width="28" HorizontalContentAlignment="Center"
+                            FontSize="16" FontWeight="Bold" />
+                    <Button Grid.Column="4"
+                            Content="-"
+                            Command="{Binding DeleteGenreCommand}"
+                            IsEnabled="{Binding !IsBusy}"
+                            Padding="0" Width="28" HorizontalContentAlignment="Center"
+                            FontSize="16" FontWeight="Bold" />
+                </Grid>
+
+                <ListBox Grid.Row="2"
+                         ItemsSource="{Binding Genres}"
+                         SelectedItem="{Binding SelectedGenre}"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled" />
+
+                <TextBox Grid.Row="3"
+                         Text="{Binding RenameGenreText}"
+                         Margin="0,6,0,4"
+                         IsEnabled="{Binding SelectedGenre, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+                <Button Grid.Row="4"
+                        Content="Rename"
+                        Command="{Binding RenameGenreCommand}"
+                        IsEnabled="{Binding !IsBusy}"
+                        HorizontalAlignment="Center"
+                        Padding="20,4" />
+
+            </Grid>
+
+        </Grid>
+
+        <!-- Bottom bar -->
+        <Border Grid.Row="2" Background="#0D0D1A" Padding="12,8"
+                BorderThickness="0,1,0,0" BorderBrush="#1C1C2E">
+            <Grid ColumnDefinitions="*,Auto">
+
+                <TextBlock Grid.Column="0"
+                           Text="{Binding StatusMessage}"
+                           FontSize="11" Foreground="#FF6B6B"
+                           VerticalAlignment="Center"
+                           IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                    <Button Content="Ok"
+                            Click="OnOkClicked"
+                            Width="80"
+                            HorizontalContentAlignment="Center"
+                            Background="#204020" Foreground="White" />
+                    <Button Content="Cancel"
+                            Click="OnCancelClicked"
+                            Width="80"
+                            HorizontalContentAlignment="Center" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+    </Grid>
+
+</Window>

@@ -1,0 +1,395 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RDM.UI.ViewModels"
+        xmlns:dto="using:RDM.Shared.DTOs"
+        xmlns:i18n="using:RDM.UI.Localization"
+        x:Class="RDM.UI.Views.UpdateTracksWindow"
+        x:DataType="vm:UpdateTracksViewModel"
+        Icon="avares://RDM/Assets/rdm.ico"
+        Title="Update Tracks"
+        Width="900" Height="700"
+        MinWidth="720" MinHeight="520"
+        WindowStartupLocation="CenterOwner"
+        CanResize="True"
+        Background="#1C1C2E">
+
+    <Window.Styles>
+        <Style Selector="ComboBox">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Padding"  Value="6,3" />
+        </Style>
+        <Style Selector="TextBox">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Padding"  Value="5,3" />
+        </Style>
+        <Style Selector="CheckBox">
+            <Setter Property="FontSize" Value="11" />
+        </Style>
+        <Style Selector="Button">
+            <Setter Property="FontSize" Value="11" />
+        </Style>
+    </Window.Styles>
+
+    <DockPanel LastChildFill="True">
+
+        <!-- ═══ Header ═══════════════════════════════════════════════════════ -->
+        <Border DockPanel.Dock="Top" Background="Black" Height="48" Padding="12,0">
+            <TextBlock Text="{i18n:Tr ut.title}"
+                       Foreground="White" FontSize="20" FontWeight="Bold"
+                       VerticalAlignment="Center" />
+        </Border>
+
+        <!-- ═══ Bottom button bar ════════════════════════════════════════════ -->
+        <Border DockPanel.Dock="Bottom"
+                Background="#0D0D1A" Padding="6,5"
+                BorderThickness="0,1,0,0" BorderBrush="#1C1C2E">
+            <Grid ColumnDefinitions="*,Auto,6,Auto">
+
+                <TextBlock Grid.Column="0"
+                           Text="{Binding ReportText}"
+                           Foreground="#4AB5FF" FontSize="12" FontWeight="Bold"
+                           VerticalAlignment="Center" Margin="4,0" />
+
+                <Button Grid.Column="1"
+                        Padding="14,5"
+                        VerticalAlignment="Center"
+                        Command="{Binding ImportSelectedCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <TextBlock Text="⬇" FontSize="12" VerticalAlignment="Center" />
+                        <TextBlock Text="{i18n:Tr ut.btn.import_selected}" FontSize="11" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <Button Grid.Column="3"
+                        Content="{i18n:Tr ut.btn.cancel}"
+                        Padding="10,5"
+                        VerticalAlignment="Center"
+                        Click="OnCancelClicked" />
+            </Grid>
+        </Border>
+
+        <!-- ═══ Main content ═════════════════════════════════════════════════ -->
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto,*,Auto" Margin="0">
+
+            <!-- ─── Folder row ─────────────────────────────────────────────── -->
+            <Border Grid.Row="0"
+                    Background="#111122" Padding="6,5"
+                    BorderThickness="0,0,0,1" BorderBrush="#1C1C2E">
+                <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                    <TextBlock Grid.Column="0"
+                               Text="{i18n:Tr ut.folder}"
+                               Foreground="LightGray"
+                               VerticalAlignment="Center" Margin="4,0,8,0" />
+                    <TextBox Grid.Column="1"
+                             Text="{Binding FolderPath}"
+                             VerticalAlignment="Center" />
+                    <Button Grid.Column="2"
+                            Width="28" Margin="4,0,0,0" Padding="3"
+                            VerticalAlignment="Center"
+                            ToolTip.Tip="{i18n:Tr ut.btn.browse}"
+                            Click="OnBrowseClicked">
+                        <TextBlock Text="📁" FontSize="11"
+                                   VerticalAlignment="Center" HorizontalAlignment="Center" />
+                    </Button>
+                    <Button Grid.Column="3"
+                            Margin="6,0,0,0" Padding="14,4"
+                            VerticalAlignment="Center"
+                            Command="{Binding ScanCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="🔍" FontSize="11" VerticalAlignment="Center" />
+                            <TextBlock Text="{i18n:Tr ut.btn.scan}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- ─── "Import Settings" label ────────────────────────────────── -->
+            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="10,5,0,3" Spacing="12">
+                <TextBlock Text="{i18n:Tr ut.import_settings}"
+                           FontSize="10" FontWeight="Bold" Foreground="#6666AA"
+                           VerticalAlignment="Center" />
+                <CheckBox Content="{i18n:Tr ut.incl_subdirs}"
+                          IsChecked="{Binding IncludeSubfolders}"
+                          Foreground="LightGray" />
+            </StackPanel>
+
+            <!-- ─── Two-column settings ────────────────────────────────────── -->
+            <Grid Grid.Row="2" ColumnDefinitions="0.55*,0.45*">
+
+                <!-- LEFT -->
+                <Grid Grid.Column="0"
+                      RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto"
+                      ColumnDefinitions="100,*,Auto"
+                      Margin="8,2,4,4">
+
+                    <!-- Category -->
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{i18n:Tr tm.col.category}"
+                               Foreground="LightGray" HorizontalAlignment="Right"
+                               VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <ComboBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
+                              HorizontalAlignment="Stretch" Margin="0,3"
+                              ItemsSource="{Binding Formats}"
+                              SelectedItem="{Binding SelectedCategory}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="dto:AssetFormatDto">
+                                <TextBlock Text="{Binding Name}" FontSize="11" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+
+                    <!-- Subcategory -->
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{i18n:Tr tm.col.subcategory}"
+                               Foreground="LightGray" HorizontalAlignment="Right"
+                               VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <ComboBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
+                              HorizontalAlignment="Stretch" Margin="0,3"
+                              ItemsSource="{Binding SubcategoryOptions}"
+                              SelectedItem="{Binding SelectedSubcategory}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="dto:SubcategoryDto">
+                                <TextBlock Text="{Binding Name}" FontSize="11" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+
+                    <!-- Genre + Auto -->
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="{i18n:Tr tm.col.genre}"
+                               Foreground="LightGray" HorizontalAlignment="Right"
+                               VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <ComboBox Grid.Row="2" Grid.Column="1"
+                              HorizontalAlignment="Stretch" Margin="0,3"
+                              ItemsSource="{Binding GenreOptions}"
+                              SelectedItem="{Binding SelectedGenre}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="dto:GenreDto">
+                                <TextBlock Text="{Binding Name}" FontSize="11" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <CheckBox Grid.Row="2" Grid.Column="2" Content="Auto"
+                              IsChecked="{Binding AutoGenre}"
+                              VerticalAlignment="Center" Margin="6,3,0,3" />
+
+                    <!-- Track Type -->
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="{i18n:Tr ti.track_type}"
+                               Foreground="LightGray" HorizontalAlignment="Right"
+                               VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <ComboBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2"
+                              HorizontalAlignment="Stretch" Margin="0,3"
+                              ItemsSource="{Binding TrackTypes}"
+                              SelectedItem="{Binding SelectedTrackType}" />
+
+                    <!-- Play track for -->
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="{i18n:Tr di.play_track_for}"
+                               Foreground="LightGray" HorizontalAlignment="Right"
+                               VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <Grid Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2"
+                          ColumnDefinitions="50,Auto,*" Margin="0,3">
+                        <TextBox Grid.Column="0" Text="{Binding PlayTrackForText}"
+                                 VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="1" Text="{i18n:Tr ti.times_then}"
+                                   Foreground="LightGray" VerticalAlignment="Center" Margin="5,0" />
+                        <ComboBox Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                                  ItemsSource="{Binding AfterPlayOptions}"
+                                  SelectedItem="{Binding SelectedAfterPlay}" />
+                    </Grid>
+
+                    <!-- Start Date -->
+                    <TextBlock Grid.Row="5" Grid.Column="0" Text="{i18n:Tr te.date_start}"
+                               Foreground="LightGray" HorizontalAlignment="Right"
+                               VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <Grid Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2"
+                          ColumnDefinitions="Auto,*,28" Margin="0,3">
+                        <CheckBox Grid.Column="0" IsChecked="{Binding StartDateEnabled}"
+                                  VerticalAlignment="Center" Margin="0,0,4,0" />
+                        <TextBox Grid.Column="1" Text="{Binding StartDateText}"
+                                 VerticalAlignment="Center" />
+                        <Button Grid.Column="2" Width="26" Margin="3,0,0,0" Padding="2"
+                                Content="▼" VerticalAlignment="Center"
+                                Click="OnStartDatePickerClicked" />
+                    </Grid>
+
+                    <!-- End Date -->
+                    <TextBlock Grid.Row="6" Grid.Column="0" Text="{i18n:Tr te.date_end}"
+                               Foreground="LightGray" HorizontalAlignment="Right"
+                               VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <Grid Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2"
+                          ColumnDefinitions="Auto,*,28" Margin="0,3">
+                        <CheckBox Grid.Column="0" IsChecked="{Binding EndDateEnabled}"
+                                  VerticalAlignment="Center" Margin="0,0,4,0" />
+                        <TextBox Grid.Column="1" Text="{Binding EndDateText}"
+                                 VerticalAlignment="Center" />
+                        <Button Grid.Column="2" Width="26" Margin="3,0,0,0" Padding="2"
+                                Content="▼" VerticalAlignment="Center"
+                                Click="OnEndDatePickerClicked" />
+                    </Grid>
+                </Grid>
+
+                <!-- RIGHT -->
+                <Grid Grid.Column="1"
+                      RowDefinitions="Auto,Auto,Auto,Auto,Auto"
+                      Margin="4,2,8,4">
+
+                    <!-- Auto BPM -->
+                    <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,3">
+                        <TextBlock Grid.Column="0" Text="Auto BPM"
+                                   Foreground="LightGray" HorizontalAlignment="Right"
+                                   VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <CheckBox Grid.Column="1" IsChecked="{Binding AutoDetectBpm}"
+                                  VerticalAlignment="Center" />
+                    </Grid>
+
+                    <!-- Track Status -->
+                    <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0,3">
+                        <TextBlock Grid.Column="0" Text="{i18n:Tr ti.track_status}"
+                                   Foreground="LightGray" FontWeight="Bold"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <ComboBox Grid.Column="1" MinWidth="110" VerticalAlignment="Center"
+                                  ItemsSource="{Binding StatusOptions}"
+                                  SelectedItem="{Binding SelectedStatus}" />
+                    </Grid>
+
+                    <!-- Read from -->
+                    <TextBlock Grid.Row="2" Text="{i18n:Tr ti.read_from}"
+                               FontSize="10" FontWeight="Bold" Foreground="#6666AA"
+                               HorizontalAlignment="Right" Margin="0,6,8,2" />
+
+                    <!-- Read .RDM + Read ID3 -->
+                    <Grid Grid.Row="3" ColumnDefinitions="*,Auto,Auto,Auto" Margin="0,3">
+                        <TextBlock Grid.Column="0" Text="Read .RDM"
+                                   Foreground="LightGray" HorizontalAlignment="Right"
+                                   VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <CheckBox Grid.Column="1" IsChecked="{Binding ReadRdm}"
+                                  VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="2" Text="Read ID3"
+                                   Foreground="LightGray" VerticalAlignment="Center" Margin="12,0,8,0" />
+                        <CheckBox Grid.Column="3" IsChecked="{Binding ReadId3}"
+                                  VerticalAlignment="Center" />
+                    </Grid>
+
+                    <!-- Read .WFRM -->
+                    <Grid Grid.Row="4" ColumnDefinitions="*,Auto" Margin="0,3">
+                        <TextBlock Grid.Column="0" Text="Read .WFRM"
+                                   Foreground="LightGray" HorizontalAlignment="Right"
+                                   VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <CheckBox Grid.Column="1" IsChecked="{Binding ReadWfrm}"
+                                  VerticalAlignment="Center" />
+                    </Grid>
+                </Grid>
+            </Grid>
+
+            <!-- ─── Selection toolbar ──────────────────────────────────────── -->
+            <Border Grid.Row="3" Background="#111122" Padding="6,4"
+                    BorderThickness="0,1,0,1" BorderBrush="#1C1C2E">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <Button Content="{i18n:Tr ut.btn.select_all}"   Padding="8,3" Command="{Binding SelectAllCommand}" />
+                    <Button Content="{i18n:Tr ut.btn.unselect_all}" Padding="8,3" Command="{Binding UnselectAllCommand}" />
+                    <Button Content="{i18n:Tr ut.btn.invert}"       Padding="8,3" Command="{Binding InvertSelectionCommand}" />
+                </StackPanel>
+            </Border>
+
+            <!-- ─── Results grid ───────────────────────────────────────────── -->
+            <DataGrid Grid.Row="4"
+                      Margin="0,0,0,0"
+                      ItemsSource="{Binding ScanResults}"
+                      IsReadOnly="False"
+                      CanUserResizeColumns="True"
+                      CanUserSortColumns="False"
+                      GridLinesVisibility="Horizontal"
+                      HeadersVisibility="Column"
+                      Background="#12121F"
+                      Foreground="LightGray">
+                <DataGrid.Styles>
+                    <Style Selector="DataGridColumnHeader">
+                        <Setter Property="FontSize" Value="11" />
+                        <Setter Property="Foreground" Value="#AAAACC" />
+                        <Setter Property="Background" Value="#0D0D1A" />
+                    </Style>
+                    <Style Selector="DataGridCell">
+                        <Setter Property="FontSize" Value="11" />
+                    </Style>
+                </DataGrid.Styles>
+                <DataGrid.Columns>
+
+                    <DataGridTemplateColumn Header="" Width="40">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="vm:UpdateTracksItemViewModel">
+                                <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                          HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="{i18n:Tr ut.col.filename}" Width="220">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="vm:UpdateTracksItemViewModel">
+                                <TextBlock Text="{Binding Filename}" Padding="4,0"
+                                           VerticalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="{i18n:Tr ut.col.artist}" Width="150">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="vm:UpdateTracksItemViewModel">
+                                <TextBlock Text="{Binding Artist}" Padding="4,0"
+                                           VerticalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="{i18n:Tr ut.col.title}" Width="200">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="vm:UpdateTracksItemViewModel">
+                                <TextBlock Text="{Binding Title}" Padding="4,0"
+                                           FontWeight="SemiBold" VerticalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="{i18n:Tr ut.col.duration}" Width="80">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="vm:UpdateTracksItemViewModel">
+                                <TextBlock Text="{Binding Duration}" Padding="4,0"
+                                           VerticalAlignment="Center" HorizontalAlignment="Center"
+                                           Foreground="#AAAACC" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="{i18n:Tr ut.col.folder}" Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="vm:UpdateTracksItemViewModel">
+                                <TextBlock Text="{Binding Folder}" Padding="4,0"
+                                           VerticalAlignment="Center"
+                                           Foreground="#888899"
+                                           TextTrimming="CharacterEllipsis" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!-- ─── Progress + status ──────────────────────────────────────── -->
+            <Border Grid.Row="5" Margin="8,4,8,5" Padding="6,4"
+                    Background="#0D0D1A" CornerRadius="3">
+                <Grid ColumnDefinitions="*" RowDefinitions="Auto,5,Auto">
+                    <TextBlock Grid.Row="0"
+                               Text="{Binding StatusMessage}"
+                               FontSize="11" Foreground="#AAAACC"
+                               VerticalAlignment="Center" />
+                    <ProgressBar Grid.Row="2"
+                                 IsVisible="{Binding ProgressVisible}"
+                                 Height="5" Minimum="0" Maximum="1"
+                                 Value="{Binding ProgressValue}"
+                                 Foreground="#4AB5FF" Background="#1C1C2E" />
+                </Grid>
+            </Border>
+
+        </Grid>
+    </DockPanel>
+</Window>

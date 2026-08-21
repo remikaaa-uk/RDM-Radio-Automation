@@ -1,0 +1,26 @@
+﻿<Project>
+  <!--
+    Jedno źródło prawdy dla wersji produktu.
+
+    VersionMajorMinor  — bumpujesz RĘCZNIE (0.5 -> 0.6 ...).
+    BuildNumber        — AUTOMATYCZNY; podbijany o 1 przez installer\publish.ps1
+                         przy każdym udanym cyklu release/instalatora.
+                         Nie edytuj ręcznie, chyba że resetujesz licznik.
+
+    Pełna wersja = VersionMajorMinor.BuildNumber (np. 0.6.306).
+
+    BuildNumber NIE jest resetowany przy zmianie linii (0.5 -> 0.6 zachowało 305):
+    numery build są unikalne w całej historii projektu, więc 0.6.306 jest jednoznacznie
+    późniejsze niż 0.5.305 także przy porównaniu liczbowym.
+  -->
+  <PropertyGroup>
+    <VersionMajorMinor>0.6</VersionMajorMinor>
+    <BuildNumber>310</BuildNumber>
+
+    <Version>$(VersionMajorMinor).$(BuildNumber)</Version>
+    <FileVersion>$(Version)</FileVersion>
+    <InformationalVersion>$(Version)</InformationalVersion>
+    <!-- AssemblyVersion stabilne w obrębie linii 0.6 — nie zmienia się co build. -->
+    <AssemblyVersion>$(VersionMajorMinor).0.0</AssemblyVersion>
+  </PropertyGroup>
+</Project>

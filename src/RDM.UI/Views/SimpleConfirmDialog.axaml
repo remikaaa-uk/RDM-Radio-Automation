@@ -1,0 +1,24 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i18n="using:RDM.UI.Localization"
+        x:Class="RDM.UI.Views.SimpleConfirmDialog"
+        Icon="avares://RDM/Assets/rdm.ico"
+        Title="{i18n:Tr common.confirm}"
+        Width="360" Height="150"
+        MinWidth="300" MinHeight="130"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        SizeToContent="Height"
+        Background="#0F0F1A">
+
+    <Grid RowDefinitions="*,Auto" Margin="20">
+        <TextBlock Grid.Row="0" Name="MessageText"
+                   FontSize="13" Foreground="#CCCCDD"
+                   TextWrapping="Wrap" VerticalAlignment="Center"
+                   Margin="0,0,0,16"/>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button Name="CancelBtn"  Content="{i18n:Tr common.no}"  Click="OnNo"  Background="#1C1C2E" Foreground="#CCCCDD" Padding="14,5"/>
+            <Button Name="ConfirmBtn" Content="{i18n:Tr common.yes}" Click="OnYes" Background="#5F1E1E" Foreground="White"   Padding="14,5"/>
+        </StackPanel>
+    </Grid>
+</Window>

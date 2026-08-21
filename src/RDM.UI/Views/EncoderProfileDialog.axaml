@@ -1,0 +1,214 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RDM.UI.ViewModels"
+        xmlns:i18n="using:RDM.UI.Localization"
+        x:Class="RDM.UI.Views.EncoderProfileDialog"
+        Icon="avares://RDM/Assets/rdm.ico"
+        x:DataType="vm:EncoderProfileEditViewModel"
+        Title="{i18n:Tr streaming.editor.title}"
+        Width="520" Height="620"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        Background="#0F0F1A">
+
+    <Window.Styles>
+        <Style Selector="TextBox">
+            <Setter Property="Background"  Value="#0A0A15" />
+            <Setter Property="Foreground"  Value="#CCCCDD" />
+            <Setter Property="BorderBrush" Value="#2A2A3E" />
+            <Setter Property="Padding"     Value="5,3" />
+            <Setter Property="FontSize"    Value="12" />
+            <Setter Property="CaretBrush"  Value="#AAAACC" />
+        </Style>
+        <Style Selector="Button">
+            <Setter Property="Background" Value="#1C1C2E" />
+            <Setter Property="Foreground" Value="#CCCCDD" />
+            <Setter Property="Padding"    Value="10,5" />
+            <Setter Property="FontSize"   Value="12" />
+        </Style>
+        <Style Selector="Button:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#2A2A40" />
+        </Style>
+        <Style Selector="TextBlock.label">
+            <Setter Property="Foreground"          Value="#8888A0" />
+            <Setter Property="FontSize"            Value="11" />
+            <Setter Property="VerticalAlignment"   Value="Center" />
+        </Style>
+        <Style Selector="TextBlock.section">
+            <Setter Property="Foreground" Value="#66667A" />
+            <Setter Property="FontSize"   Value="10" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Margin"     Value="0,12,0,4" />
+        </Style>
+        <Style Selector="CheckBox">
+            <Setter Property="Foreground" Value="#CCCCDD" />
+            <Setter Property="FontSize"   Value="12" />
+        </Style>
+        <Style Selector="ComboBox">
+            <Setter Property="Background"  Value="#0A0A15" />
+            <Setter Property="Foreground"  Value="#CCCCDD" />
+            <Setter Property="BorderBrush" Value="#2A2A3E" />
+            <Setter Property="FontSize"    Value="12" />
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="*,Auto" Margin="14">
+
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="6">
+
+                <TextBlock Classes="section" Text="{i18n:Tr streaming.editor.section.general}" />
+
+                <Grid ColumnDefinitions="130,*" RowDefinitions="Auto">
+                    <TextBlock Classes="label" Text="{i18n:Tr streaming.editor.name}" />
+                    <TextBox Grid.Column="1" Text="{Binding Name}" />
+                </Grid>
+
+                <Grid ColumnDefinitions="130,*">
+                    <TextBlock Classes="label" Text="{i18n:Tr streaming.editor.format}" />
+                    <ComboBox Grid.Column="1" HorizontalAlignment="Stretch"
+                              ItemsSource="{Binding Formats}"
+                              SelectedItem="{Binding Format}" />
+                </Grid>
+
+                <Grid ColumnDefinitions="130,*">
+                    <TextBlock Classes="label" Text="{i18n:Tr streaming.editor.bitrate}" />
+                    <ComboBox Grid.Column="1" HorizontalAlignment="Stretch"
+                              ItemsSource="{Binding Bitrates}"
+                              SelectedItem="{Binding BitrateKbps}" />
+                </Grid>
+
+                <TextBlock Classes="section" Text="{i18n:Tr streaming.editor.section.server}" />
+
+                <Grid ColumnDefinitions="130,*">
+                    <TextBlock Classes="label" Text="{i18n:Tr streaming.editor.server_type}" />
+                    <ComboBox Grid.Column="1" HorizontalAlignment="Stretch"
+                              ItemsSource="{Binding ServerTypes}"
+                              SelectedItem="{Binding ServerType}" />
+                </Grid>
+
+                <Grid ColumnDefinitions="130,*">
+                    <TextBlock Classes="label" Text="{i18n:Tr streaming.editor.host}" />
+                    <TextBox Grid.Column="1" Text="{Binding Host}" Watermark="stream.example.org" />
+                </Grid>
+
+                <Grid ColumnDefinitions="130,*">
+                    <TextBlock Classes="label" Text="{i18n:Tr streaming.editor.port}" />
+                    <TextBox Grid.Column="1" Text="{Binding Port}" />
+                </Grid>
+
+                <!-- Each of these appears only where the protocol carries it: a mount point is
+                     Icecast's, a stream id is SHOUTcast 2's, and SHOUTcast 1 has no username at
+                     all. An always-visible box would invite input the server never receives. -->
+                <Grid ColumnDefinitions="130,*" IsVisible="{Binding MountRequired}">
+                    <TextBlock Classes="label" Text="{i18n:Tr streaming.editor.mount}" />
+                    <TextBox Grid.Column="1" Text="{Binding Mount}" Watermark="/live" />
+                </Grid>
+
+                <Grid ColumnDefinitions="130,*" IsVisible="{Binding NeedsStreamId}">
+                    <TextBlock Classes="label" Text="{i18n:Tr streaming.editor.stream_id}" />
+                    <TextBox Grid.Column="1" Text="{Binding StreamId}" Watermark="1" />
+                </Grid>
+
+                <Grid ColumnDefinitions="130,*" IsVisible="{Binding SupportsUser}">
+                    <TextBlock Classes="label" Text="{i18n:Tr streaming.editor.username}" />
+                    <TextBox Grid.Column="1" Text="{Binding Username}" Watermark="source" />
+                </Grid>
+
+                <Grid ColumnDefinitions="130,*">
+                    <TextBlock Classes="label" Text="{i18n:Tr streaming.editor.password}" />
+                    <TextBox Grid.Column="1" Text="{Binding Password}" PasswordChar="*" />
+                </Grid>
+
+                <CheckBox Content="{i18n:Tr streaming.editor.use_put}"
+                          IsChecked="{Binding UsePut}"
+                          IsVisible="{Binding SupportsPut}" />
+
+                <TextBlock Text="{i18n:Tr streaming.editor.use_put_hint}"
+                           Foreground="#66667A" FontSize="10" TextWrapping="Wrap"
+                           IsVisible="{Binding SupportsPut}" />
+
+                <TextBlock Text="{i18n:Tr streaming.editor.password_kept}"
+                           Foreground="#66667A" FontSize="10" Margin="130,0,0,0"
+                           TextWrapping="Wrap"
+                           IsVisible="{Binding HadPassword}" />
+
+                <CheckBox Content="{i18n:Tr streaming.editor.use_ssl}" IsChecked="{Binding UseSsl}" />
+
+                <TextBlock Classes="section" Text="{i18n:Tr streaming.editor.section.metadata}" />
+
+                <Grid ColumnDefinitions="130,*">
+                    <TextBlock Classes="label" Text="{i18n:Tr streaming.editor.stream_name}" />
+                    <TextBox Grid.Column="1" Text="{Binding StreamName}" />
+                </Grid>
+
+                <Grid ColumnDefinitions="130,*">
+                    <TextBlock Classes="label" Text="{i18n:Tr streaming.editor.genre}" />
+                    <TextBox Grid.Column="1" Text="{Binding Genre}" />
+                </Grid>
+
+                <Grid ColumnDefinitions="130,*">
+                    <TextBlock Classes="label" Text="{i18n:Tr streaming.editor.stream_url}" />
+                    <TextBox Grid.Column="1" Text="{Binding StreamUrl}" />
+                </Grid>
+
+                <Grid ColumnDefinitions="130,*">
+                    <TextBlock Classes="label" Text="{i18n:Tr streaming.editor.description}" />
+                    <TextBox Grid.Column="1" Text="{Binding Description}" />
+                </Grid>
+
+                <CheckBox Content="{i18n:Tr streaming.editor.is_public}" IsChecked="{Binding IsPublic}" />
+
+                <TextBlock Classes="section" Text="{i18n:Tr streaming.editor.section.title}" />
+
+                <Grid ColumnDefinitions="130,*">
+                    <TextBlock Classes="label" Text="{i18n:Tr streaming.editor.title_mode}" />
+                    <ComboBox Grid.Column="1" HorizontalAlignment="Stretch"
+                              ItemsSource="{Binding TitleModes}"
+                              SelectedItem="{Binding TitleMode}" />
+                </Grid>
+
+                <!-- Only for the fixed-text mode: an always-visible box would invite the operator
+                     to type a title that the other two modes silently ignore. -->
+                <Grid ColumnDefinitions="130,*" IsVisible="{Binding IsStaticTitle}">
+                    <TextBlock Classes="label" Text="{i18n:Tr streaming.editor.title_text}" />
+                    <TextBox Grid.Column="1" Text="{Binding TitleText}" />
+                </Grid>
+
+                <TextBlock Text="{i18n:Tr streaming.editor.title_hint}"
+                           Foreground="#66667A" FontSize="10" Margin="130,0,0,0"
+                           TextWrapping="Wrap" />
+
+                <TextBlock Classes="section" Text="{i18n:Tr streaming.editor.section.behaviour}" />
+
+                <CheckBox Content="{i18n:Tr streaming.editor.enabled}" IsChecked="{Binding Enabled}" />
+                <CheckBox Content="{i18n:Tr streaming.editor.armed}"   IsChecked="{Binding Armed}" />
+                <CheckBox Content="{i18n:Tr streaming.editor.auto_start}"
+                          IsChecked="{Binding AutoStart}"
+                          IsEnabled="{Binding CanAutoStart}"
+                          Margin="20,0,0,0" />
+
+                <Grid ColumnDefinitions="130,*" Margin="0,6,0,0">
+                    <TextBlock Classes="label" Text="{i18n:Tr streaming.editor.reconnect_delay}" />
+                    <TextBox Grid.Column="1" Text="{Binding ReconnectDelaySeconds}" Watermark="10" />
+                </Grid>
+
+                <TextBlock Text="{i18n:Tr streaming.editor.reconnect_delay_hint}"
+                           Foreground="#66667A" FontSize="10" Margin="130,0,0,0"
+                           TextWrapping="Wrap" />
+
+                <TextBlock Text="{Binding Error}"
+                           Foreground="#FF6B6B" FontSize="11" TextWrapping="Wrap"
+                           Margin="0,10,0,0"
+                           IsVisible="{Binding Error, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+            </StackPanel>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right"
+                    Spacing="8" Margin="0,12,0,0">
+            <Button Content="{i18n:Tr common.cancel}" Click="OnCancelClicked" IsCancel="True" />
+            <Button Content="{i18n:Tr common.save}" Click="OnSaveClicked" IsDefault="True"
+                    Background="#1B4D2E" Foreground="#DDFFDD" />
+        </StackPanel>
+    </Grid>
+</Window>
